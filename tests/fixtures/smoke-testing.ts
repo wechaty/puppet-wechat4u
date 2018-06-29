@@ -13,11 +13,23 @@ import {
 
 import {
   PuppetWechat4u,
+  log,
 }                 from 'wechaty-puppet-wechat4u'
+
+log.level('silly')
 
 async function main () {
   const puppet = new PuppetWechat4u({ memory: new MemoryCard() })
-  console.log(`Puppet v${puppet.version()} smoking test passed.`)
+  const future = new Promise(r => puppet.once('scan', r))
+
+  await puppet.start()
+  await future
+
+  log.info('SmokeTesting', 'main() event `scan` received!')
+
+  await puppet.stop()
+
+  log.info('SmokeTesting', `Puppet v${puppet.version()} smoking test passed.`)
   return 0
 }
 

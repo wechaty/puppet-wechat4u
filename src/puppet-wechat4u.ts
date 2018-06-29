@@ -131,11 +131,15 @@ export class PuppetWechat4u extends Puppet {
 
     this.initHookEvents(this.wechat4u)
 
+    /**
+     * Should not `await` start/restart for wechat4u
+     * because it will blocks...
+     */
     if (this.wechat4u.PROP.uin) {
       // 存在登录数据时，可以随时调用restart进行重启
-      await this.wechat4u.restart()
+      this.wechat4u.restart()
     } else {
-      await this.wechat4u.start()
+      this.wechat4u.start()
     }
 
     // await some tasks...
@@ -149,6 +153,8 @@ export class PuppetWechat4u extends Puppet {
      * uuid事件，参数为uuid，根据uuid生成二维码
      */
     this.wechat4u.on('uuid', (uuid: string) => {
+      log.silly('PuppetWechat4u', 'initHookEvents() wechat4u.on(uuid)')
+
       this.scanQrCode = 'https://login.weixin.qq.com/l/' + uuid
       this.emit('scan', this.scanQrCode, 0)
     })

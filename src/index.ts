@@ -19,10 +19,12 @@
 // tslint:disable:no-reference
 /// <reference path="./typings.d.ts" />
 
-import { PuppetWechat4u }  from './puppet-wechat4u'
+import { log }            from './config'
+import { PuppetWechat4u } from './puppet-wechat4u'
 
 export {
   PuppetWechat4u,
+  log,
 }
 
 export default PuppetWechat4u
