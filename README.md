@@ -1,2 +1,3 @@
-# wechaty-puppet-wechat4u
+# WECHATY-PUPPET-WECHAT4U
+
 Wechat4u Puppet for Wechaty
