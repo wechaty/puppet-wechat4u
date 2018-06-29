@@ -87,5 +87,7 @@
     "wechaty-puppet": "0.2.3"
   },
   "homepage": "https://github.com/zixia/wechaty-puppet-wechat4u#readme",
-  "dependencies": {}
+  "dependencies": {
+    "wechat4u": "^0.7.6"
+  }
 }
