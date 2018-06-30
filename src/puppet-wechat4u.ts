@@ -94,7 +94,7 @@ export class PuppetWechat4u extends Puppet {
    * https://github.com/nodeWechat/wechat4u/blob/46931e78bcb56899b8d2a42a37b919e7feaebbef/run-core.js
    *
    */
-  private wechat4u: any
+  private wechat4u?: any
 
   private scanQrCode?: string
 
@@ -122,12 +122,21 @@ export class PuppetWechat4u extends Puppet {
 
     this.state.on('pending')
 
+    if (this.wechat4u) {
+      log.warn('PuppetWechat4u', 'start() wechat4u exist, will be overwrited')
+    }
+
     const syncData = await this.options.memory.get(MEMORY_SLOT_NAME)
     if (syncData) {
       this.wechat4u = new Wechat4u(syncData)
     } else {
       this.wechat4u = new Wechat4u()
     }
+
+    // fake wechat4u to think as we had logined.)
+    this.monkeyPatch(this.wechat4u, 'checkLogin', Promise.resolve({ code: 200 }))
+    this.monkeyPatch(this.wechat4u, 'login',      Promise.resolve())
+    this.monkeyPatch(this.wechat4u, '_init',      Promise.resolve())
 
     this.initHookEvents(this.wechat4u)
 
@@ -145,6 +154,33 @@ export class PuppetWechat4u extends Puppet {
     // await some tasks...
     this.state.on(true)
 
+  }
+
+  /**
+   * Monkey Patch for Wechat4u
+   *  - https://www.audero.it/blog/2016/12/05/monkey-patching-javascript/#what-is-monkey-patching
+   *
+   * What is Monkey patching?
+   *  Monkey patching is a technique to add, modify, or suppress
+   *  the default behavior of a piece of code at runtime
+   *  without changing its original source code.
+   */
+  private monkeyPatch (wechat4u: any, func: string, valueWhenLogouted: any): void {
+    log.verbose('PuppetWechat4u', 'monkeyPatch(wechat4u, %s)', func)
+
+    const puppetThis = this
+
+    const funcOrig = wechat4u[func]
+    function funcNew (this: any) {
+      log.verbose('PuppetWechat4u', 'monkeyPatch(%s) funcNew()', func)
+
+      if (!puppetThis.state.on()) {
+        log.verbose('PuppetWechat4u', 'monkeyPatch(%s) funcNew() state.on() is false, return.', func)
+        return valueWhenLogouted
+      }
+      return funcOrig.call(this)
+    }
+    wechat4u[func] = funcNew
   }
 
   private initHookEvents (wechat4u: any) {
@@ -261,7 +297,8 @@ export class PuppetWechat4u extends Puppet {
 
     this.state.off('pending')
 
-    await this.wechat4u.stop()
+    this.wechat4u.stop()
+    this.wechat4u = undefined
 
     this.state.off(true)
   }

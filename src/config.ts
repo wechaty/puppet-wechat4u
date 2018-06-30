@@ -1,3 +1,7 @@
+// tslint:disable:no-reference
+
+/// <reference path="./typings.d.ts" />
+
 import {
   // Brolog,
   log,
