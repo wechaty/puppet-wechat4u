@@ -138,6 +138,10 @@ export class PuppetWechat4u extends Puppet {
     this.monkeyPatch(this.wechat4u, 'login',      Promise.resolve())
     this.monkeyPatch(this.wechat4u, '_init',      Promise.resolve())
 
+    // 自定义心跳间隔（以毫秒为单位）
+    // 25 days: https://stackoverflow.com/a/12633556/1123955
+    this.wechat4u.setPollingIntervalGetter(() => Math.pow(2,31) - 1)
+
     this.initHookEvents(this.wechat4u)
 
     /**
