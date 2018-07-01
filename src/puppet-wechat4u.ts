@@ -134,9 +134,21 @@ export class PuppetWechat4u extends Puppet {
     }
 
     // fake wechat4u to think as we had logined.)
-    this.monkeyPatch(this.wechat4u, 'checkLogin', Promise.resolve({ code: 200 }))
-    this.monkeyPatch(this.wechat4u, 'login',      Promise.resolve())
-    this.monkeyPatch(this.wechat4u, '_init',      Promise.resolve())
+    this.monkeyPatchOffState(this.wechat4u, 'checkLogin', Promise.resolve({ code: 200 }))
+    this.monkeyPatchOffState(this.wechat4u, 'login',      Promise.resolve())
+    this.monkeyPatchOffState(this.wechat4u, '_init',      Promise.resolve())
+
+    this.monkeyPatchHook(
+      this.wechat4u,
+      'syncCheck',
+      () => {
+        log.silly('PuppetWechat4u', 'start() monkeyPatchHook() wechat4u.syncCheck()')
+        this.watchdog.feed({
+          data: 'syncCheck()',
+          type: 'wechat4u',
+        })
+      },
+    )
 
     // 自定义心跳间隔（以毫秒为单位）
     // 25 days: https://stackoverflow.com/a/12633556/1123955
@@ -169,19 +181,31 @@ export class PuppetWechat4u extends Puppet {
    *  the default behavior of a piece of code at runtime
    *  without changing its original source code.
    */
-  private monkeyPatch (wechat4u: any, func: string, valueWhenLogouted: any): void {
-    log.verbose('PuppetWechat4u', 'monkeyPatch(wechat4u, %s)', func)
+  private monkeyPatchOffState (wechat4u: any, func: string, valueWhenLogouted: any): void {
+    log.verbose('PuppetWechat4u', 'monkeyPatchOffState(wechat4u, %s)', func)
 
     const puppetThis = this
 
     const funcOrig = wechat4u[func]
     function funcNew (this: any) {
-      log.verbose('PuppetWechat4u', 'monkeyPatch(%s) funcNew()', func)
+      log.verbose('PuppetWechat4u', 'monkeyPatchOffState(%s) funcNew()', func)
 
-      if (!puppetThis.state.on()) {
-        log.verbose('PuppetWechat4u', 'monkeyPatch(%s) funcNew() state.on() is false, return.', func)
+      if (puppetThis.state.off()) {
+        log.verbose('PuppetWechat4u', 'monkeyPatchOffState(%s) funcNew() state.off() is true, return', func)
         return valueWhenLogouted
       }
+      return funcOrig.call(this)
+    }
+    wechat4u[func] = funcNew
+  }
+
+  private monkeyPatchHook (wechat4u: any, func: string, hookFunc: () => void): void {
+    log.verbose('PuppetWechat4u', 'monkeyPatchHook(wechat4u, %s, func)', func)
+
+    const funcOrig = wechat4u[func]
+    function funcNew (this: any) {
+      log.verbose('PuppetWechat4u', 'monkeyPatchHook(%s) funcNew()', func)
+      hookFunc()
       return funcOrig.call(this)
     }
     wechat4u[func] = funcNew
@@ -234,11 +258,10 @@ export class PuppetWechat4u extends Puppet {
      * 联系人更新事件，参数为被更新的联系人列表
      */
     wechat4u.on('contacts-updated', (contacts: WebContactRawPayload[]) => {
-      log.silly('PuppetWechat4u', 'initHookEvents() wechat4u.on(contacts-updated) contacts.length=%d', contacts.length)
-      // Just for memory
-      return contacts
-      // console.log('contacts.length: ', contacts[0])
-      // console.log('联系人数量：', Object.keys(wechat4u.contacts).length)
+      log.silly('PuppetWechat4u', 'initHookEvents() wechat4u.on(contacts-updated) new/total contacts.length=%d/%d',
+                                  contacts.length,
+                                  Object.keys(wechat4u.contacts).length,
+                )
     })
     /**
      * 错误事件，参数一般为Error对象
