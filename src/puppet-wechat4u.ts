@@ -237,7 +237,7 @@ export class PuppetWechat4u extends Puppet {
 
     const funcOrig = wechat4u[func]
     function funcNew (this: any) {
-      log.verbose('PuppetWechat4u', 'monkeyPatchHook(wechat4u, %s, func) funcNew()', func)
+      log.silly('PuppetWechat4u', 'monkeyPatchHook(wechat4u, %s, func) funcNew()', func)
       hookFunc()
       return funcOrig.call(this)
     }
