@@ -138,26 +138,7 @@ export class PuppetWechat4u extends Puppet {
       this.wechat4u = new Wechat4u()
     }
 
-    // fake wechat4u to think as we had logined.)
-    this.monkeyPatchOffState(this.wechat4u, 'checkLogin', Promise.resolve({ code: 200 }))
-    this.monkeyPatchOffState(this.wechat4u, 'login',      Promise.resolve())
-    this.monkeyPatchOffState(this.wechat4u, '_init',      Promise.resolve())
-
-    this.monkeyPatchHook(
-      this.wechat4u,
-      'syncCheck',
-      () => {
-        log.silly('PuppetWechat4u', 'start() monkeyPatchHook() wechat4u.syncCheck()')
-        this.watchdog.feed({
-          data: 'syncCheck()',
-          type: 'wechat4u',
-        })
-      },
-    )
-
-    // 自定义心跳间隔（以毫秒为单位）
-    // 25 days: https://stackoverflow.com/a/12633556/1123955
-    this.wechat4u.setPollingIntervalGetter(() => Math.pow(2,31) - 1)
+    this.monkeyPatch(this.wechat4u)
 
     this.initHookEvents(this.wechat4u)
 
@@ -174,6 +155,53 @@ export class PuppetWechat4u extends Puppet {
 
     // await some tasks...
     this.state.on(true)
+
+  }
+
+  private monkeyPatch (wechat4u: any) {
+    log.silly('PuppetWechat4u', 'monkeyPatch()')
+
+    // fake wechat4u to think as we had logined.)
+    this.monkeyPatchOffState(wechat4u, 'checkLogin', Promise.resolve({ code: 200 }))
+    this.monkeyPatchOffState(wechat4u, 'login',      Promise.resolve())
+    this.monkeyPatchOffState(wechat4u, '_init',      Promise.resolve())
+
+    this.monkeyPatchHook(
+      wechat4u,
+      'syncCheck',
+      () => {
+        log.silly('PuppetWechat4u', 'monkeyPatch() monkeyPatchHook() wechat4u.syncCheck()')
+        this.watchdog.feed({
+          data: 'syncCheck()',
+          type: 'wechat4u',
+        })
+      },
+    )
+
+    /**
+     * Disable Wechat4u for Sending Message to Filehelper when Heartbeat.
+     */
+    // tslint:disable-next-line
+    // console.log(Object.keys(wechat4u))
+
+    // tslint:disable-next-line:no-string-literal
+    wechat4u['checkPolling'] = () => {
+      log.silly('PuppetWechat4u', 'monkeyPatch() wechat4u.checkPolling()')
+      if (this.state.off()) {
+        return
+      }
+      wechat4u.notifyMobile()
+      .catch((err: Error) => {
+        log.warn('PuppetWechat4u', 'monkeyPatch() wechat4u.checkPolling() notifyMobile() exception: %s', err)
+        wechat4u.emit('error', err)
+      })
+      clearTimeout(wechat4u.checkPollingId)
+      wechat4u.checkPollingId = setTimeout(() => wechat4u.checkPolling(), wechat4u._getPollingInterval())
+    }
+
+    // 自定义心跳间隔（以毫秒为单位）
+    // 25 days: https://stackoverflow.com/a/12633556/1123955
+    // this.wechat4u.setPollingIntervalGetter(() => Math.pow(2,31) - 1)
 
   }
 
@@ -209,7 +237,7 @@ export class PuppetWechat4u extends Puppet {
 
     const funcOrig = wechat4u[func]
     function funcNew (this: any) {
-      log.verbose('PuppetWechat4u', 'monkeyPatchHook(%s) funcNew()', func)
+      log.verbose('PuppetWechat4u', 'monkeyPatchHook(wechat4u, %s, func) funcNew()', func)
       hookFunc()
       return funcOrig.call(this)
     }
