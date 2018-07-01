@@ -440,23 +440,43 @@ export class PuppetWechat4u extends Puppet {
     )
   }
 
-  public async contactRawPayload (id: string): Promise<WebContactRawPayload> {
+  public async contactRawPayload (contactId: string): Promise<WebContactRawPayload> {
     log.verbose('PuppetWechat4u', 'contactRawPayload(%s) with contacts.length=%d',
-                                  id,
+                                  contactId,
                                   Object.keys(this.wechat4u.contacts).length,
                 )
 
-    const rawPayload: WebContactRawPayload = await retry<WebContactRawPayload>((retryException, attempt) => {
-      log.verbose('PuppetWechat4u', 'contactRawPayload(%s) retry() attempt=%d', id, attempt)
+    if (!(contactId in this.wechat4u.contacts)) {
+      try {
+        const userDataList = [
+          {
+            EncryChatRoomId : '',
+            UserName        : contactId,
+          },
+        ]
+        const result = await this.wechat4u.batchGetContact(userDataList)
 
-      if (id in this.wechat4u.contacts) {
-        return this.wechat4u.contacts[id]
+        log.silly('PuppetWechat4u', 'contactRawPayload(%s) wechat4u.batchGetContact() result: %s',
+                                    JSON.stringify(result),
+                  )
+
+        this.wechat4u.updateContacts(result)
+      } catch (e) {
+        log.warn('PuppetWechat4u', 'contactRawPayload(%s) wechat4u.batchGetContact() exception: %s', e)
       }
-      retryException(new Error('no this.wechat4u.contacts[' + id + ']'))
+    }
+
+    const rawPayload: WebContactRawPayload = await retry<WebContactRawPayload>(async (retryException, attempt) => {
+      log.verbose('PuppetWechat4u', 'contactRawPayload(%s) retry() attempt=%d', contactId, attempt)
+
+      if (contactId in this.wechat4u.contacts) {
+        return this.wechat4u.contacts[contactId]
+      }
+
+      retryException(new Error('no this.wechat4u.contacts[' + contactId + ']'))
     })
 
     return rawPayload
-
   }
 
   public async contactRawPayloadParser (
