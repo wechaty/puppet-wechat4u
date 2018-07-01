@@ -102,7 +102,7 @@ export class PuppetWechat4u extends Puppet {
   private memory: MemoryCard
 
   constructor (
-    public options: PuppetOptions = {},
+    public options: PuppetOptions,
   ) {
     super(options)
 
