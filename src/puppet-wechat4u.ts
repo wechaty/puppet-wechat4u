@@ -21,9 +21,8 @@
 
 import LRU from 'lru-cache'
 
-import {
-  FileBox,
-}             from 'file-box'
+import { FileBox }    from 'file-box'
+import { MemoryCard } from 'memory-card'
 
 import Wechat4u from 'wechat4u'
 
@@ -100,10 +99,16 @@ export class PuppetWechat4u extends Puppet {
 
   private readonly cacheMessageRawPayload: LRU.Cache<string, WebMessageRawPayload>
 
+  private memory: MemoryCard
+
   constructor (
-    public options: PuppetOptions,
+    public options: PuppetOptions = {},
   ) {
     super(options)
+
+    this.memory = options.memory
+                  ? options.memory
+                  : new MemoryCard()
 
     const lruOptions: LRU.Options = {
       max: 10000,
@@ -118,7 +123,7 @@ export class PuppetWechat4u extends Puppet {
   }
 
   public async start (): Promise<void> {
-    log.verbose('PuppetWechat4u', `start() with ${this.options.memory.name}`)
+    log.verbose('PuppetWechat4u', `start() with ${this.memory.name}`)
 
     this.state.on('pending')
 
@@ -126,7 +131,7 @@ export class PuppetWechat4u extends Puppet {
       log.warn('PuppetWechat4u', 'start() wechat4u exist, will be overwrited')
     }
 
-    const syncData = await this.options.memory.get(MEMORY_SLOT_NAME)
+    const syncData = await this.memory.get(MEMORY_SLOT_NAME)
     if (syncData) {
       this.wechat4u = new Wechat4u(syncData)
     } else {
@@ -240,8 +245,8 @@ export class PuppetWechat4u extends Puppet {
       }
       await this.login(userId)
       // 保存数据，将数据序列化之后保存到任意位置
-      await this.options.memory.set(MEMORY_SLOT_NAME, wechat4u.botData)
-      await this.options.memory.save()
+      await this.memory.set(MEMORY_SLOT_NAME, wechat4u.botData)
+      await this.memory.save()
     })
     /**
      * 登出成功事件
@@ -251,8 +256,8 @@ export class PuppetWechat4u extends Puppet {
         await this.logout()
       }
       // 清除数据
-      await this.options.memory.delete(MEMORY_SLOT_NAME)
-      await this.options.memory.save()
+      await this.memory.delete(MEMORY_SLOT_NAME)
+      await this.memory.save()
     })
     /**
      * 联系人更新事件，参数为被更新的联系人列表
