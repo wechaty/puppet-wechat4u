@@ -1,6 +1,6 @@
 {
   "name": "wechaty-puppet-wechat4u",
-  "version": "0.2.14",
+  "version": "0.2.15",
   "description": "Wechat4u Puppet for Wechaty",
   "main": "dist/src/index.js",
   "typings": "dist/src/index.d.ts",
