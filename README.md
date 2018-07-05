@@ -14,6 +14,15 @@ See: [New Puppet - Plan to support `WECHATY_HEAD=WECHAT4U` #69](https://github.c
 
 [Wechat4U](https://github.com/nodeWechat/wechat4u) is an excellent wechat bot framework that supports both Node.js & Browser, with rich features and an active community of experienced contributors.
 
+## KNOWN LIMITATIONS
+
+1. WeChat Account that registered after 2017 mignt not be able to login Web Wechat, so it can not use PuppetPuppeteer with Wechaty. Please make sure your WeChat Account can be able to login by visiting https://wx.qq.com
+1. Web API can not create room and invite members to room since 2018.
+
+If you want to break the above limitations, please consider to use a Wechaty Puppet other than using Web API, like [wechaty-puppet-padchat](https://github.com/lijiarui/wechaty-puppet-padchat).
+
+Learn more about the Puppet at [Wechaty wiki: Puppet](https://github.com/Chatie/wechaty/wiki/Puppet)
+
 ## AUTHOR
 
 [Huan LI](http://linkedin.com/in/zixia) \<zixia@zixia.net\>
