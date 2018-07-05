@@ -8,10 +8,6 @@
 // tslint:disable:no-console
 
 import {
-  MemoryCard,
-}                 from 'memory-card'
-
-import {
   PuppetWechat4u,
   log,
 }                 from 'wechaty-puppet-wechat4u'
@@ -19,7 +15,7 @@ import {
 log.level('silly')
 
 async function main () {
-  const puppet = new PuppetWechat4u({ memory: new MemoryCard() })
+  const puppet = new PuppetWechat4u()
   const future = new Promise(r => puppet.once('scan', r))
 
   await puppet.start()

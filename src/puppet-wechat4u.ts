@@ -22,7 +22,6 @@
 import LRU from 'lru-cache'
 
 import { FileBox }    from 'file-box'
-import { MemoryCard } from 'memory-card'
 
 import Wechat4u from 'wechat4u'
 
@@ -99,16 +98,10 @@ export class PuppetWechat4u extends Puppet {
 
   private readonly cacheMessageRawPayload: LRU.Cache<string, WebMessageRawPayload>
 
-  private memory: MemoryCard
-
   constructor (
     public options: PuppetOptions = {},
   ) {
     super(options)
-
-    this.memory = options.memory
-                  ? options.memory
-                  : new MemoryCard()
 
     const lruOptions: LRU.Options = {
       max: 10000,
