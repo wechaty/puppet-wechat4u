@@ -164,7 +164,7 @@ export class PuppetWechat4u extends Puppet {
       'syncCheck',
       () => {
         log.silly('PuppetWechat4u', 'monkeyPatch() monkeyPatchHook() wechat4u.syncCheck()')
-        this.watchdog.feed({
+        this.emit('watchdog', {
           data: 'syncCheck()',
           type: 'wechat4u',
         })
