@@ -3,7 +3,7 @@
 [![Powered by Wechaty](https://img.shields.io/badge/Powered%20By-Wechaty-blue.svg)](https://github.com/chatie/wechaty)
 [![NPM Version](https://badge.fury.io/js/wechaty-puppet-wechat4u.svg)](https://badge.fury.io/js/wechaty-puppet-wechat4u)
 [![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-blue.svg)](https://www.typescriptlang.org/)
-[![Linux/Mac Build Status](https://travis-ci.com/Chatie/wechaty-puppet-wechat4u.svg?branch=master)](https://travis-ci.com/Chatie/wechaty-puppet-wechat4u)
+[![Linux/Mac Build Status](https://travis-ci.com/Chatie/wechaty-puppet-wechat4u.svg?branch=master)](https://travis-ci.com/Chatie/wechaty-puppet-wechat4u) [![Greenkeeper badge](https://badges.greenkeeper.io/Chatie/wechaty-puppet-wechat4u.svg)](https://greenkeeper.io/)
 
 ![wechaty puppet wechat4u](https://chatie.io/wechaty-puppet-wechat4u/images/wechat4u-logo.png)
 
