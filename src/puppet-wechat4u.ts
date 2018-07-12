@@ -48,6 +48,7 @@ import {
   log,
   qrCodeForChatie,
   retry,
+  VERSION,
 }                       from './config'
 
 import {
@@ -84,6 +85,7 @@ import {
 const MEMORY_SLOT_NAME = 'PUPPET-WECHAT4U'
 
 export class PuppetWechat4u extends Puppet {
+  public static readonly VERSION = VERSION
 
   /**
    * Wecaht4u
