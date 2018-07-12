@@ -1008,6 +1008,11 @@ export class PuppetWechat4u extends Puppet {
     return found
   }
 
+  public unref (): void {
+    log.verbose('PuppetWechat4u', 'unref()')
+    super.unref()
+    // TODO: unref wechat4u
+  }
 }
 
 export default PuppetWechat4u
