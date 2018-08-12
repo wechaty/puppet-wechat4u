@@ -19,7 +19,7 @@ npm install *-*.*.*.tgz \
   file-box \
   memory-card \
   typescript \
-  wechaty-puppet \
+  wechaty-puppet@next \
 
 ./node_modules/.bin/tsc \
   --esModuleInterop \
