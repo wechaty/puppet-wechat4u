@@ -16,19 +16,10 @@ npm install *-*.*.*.tgz \
   @types/node \
   @types/normalize-package-data \
   @types/promise-retry \
-  brolog \
   file-box \
-  hot-import \
-  lru-cache \
   memory-card \
-  normalize-package-data \
-  state-switch \
   typescript \
   wechaty-puppet \
-  wechat4u \
-  qr-image \
-  promise-retry \
-  watchdog \
 
 ./node_modules/.bin/tsc \
   --esModuleInterop \
