@@ -1,6 +1,6 @@
 {
   "name": "wechaty-puppet-wechat4u",
-  "version": "0.8.5",
+  "version": "0.14.2",
   "description": "Wechat4u Puppet for Wechaty",
   "main": "dist/src/index.js",
   "typings": "dist/src/index.d.ts",
@@ -49,15 +49,15 @@
     "blue-tape": "^1.0.0",
     "file-box": "^0.8.22",
     "git-scripts": "^0.2.1",
-    "markdownlint-cli": "^0.12.0",
     "memory-card": "^0.6.2",
+    "markdownlint-cli": "^0.13.0",
     "semver": "^5.5.0",
     "shx": "^0.3.1",
     "ts-node": "^7.0.0",
     "tslint": "^5.10.0",
     "tslint-config-standard": "^7.1.0",
     "typescript": "^2.9.2",
-    "wechaty-puppet": "^0.8.5"
+    "wechaty-puppet": "^0.14.1"
   },
   "git": {
     "scripts": {
@@ -66,7 +66,7 @@
   },
   "peerDependencies": {
     "file-box": "^0.8",
-    "wechaty-puppet": "^0.8.1"
+    "wechaty-puppet": "^0.14.1"
   },
   "homepage": "https://github.com/zixia/wechaty-puppet-wechat4u#readme",
   "dependencies": {

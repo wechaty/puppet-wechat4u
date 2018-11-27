@@ -38,11 +38,18 @@ import {
 
   Puppet,
   PuppetOptions,
+
   Receiver,
+
+  RoomInvitationPayload,
 
   RoomMemberPayload,
   RoomPayload,
-}                       from 'wechaty-puppet'
+
+  throwUnsupportedError,
+
+  UrlLinkPayload,
+}                         from 'wechaty-puppet'
 
 import {
   log,
@@ -373,6 +380,24 @@ export class PuppetWechat4u extends Puppet {
 
   /**
    *
+   * ContactSelf
+   *
+   *
+   */
+  public async contactSelfQrcode (): Promise<string> {
+    return throwUnsupportedError()
+  }
+
+  public async contactSelfName (name: string): Promise<void> {
+    return throwUnsupportedError()
+  }
+
+  public async contactSelfSignature (signature: string): Promise<void> {
+    return throwUnsupportedError()
+  }
+
+  /**
+   *
    * Contact
    *
    */
@@ -402,12 +427,7 @@ export class PuppetWechat4u extends Puppet {
   }
 
   public async contactQrcode (contactId: string): Promise<string> {
-    if (contactId !== this.selfId()) {
-      throw new Error('can not set avatar for others')
-    }
-
-    throw new Error('not supported')
-    // return await this.bridge.WXqr
+    return throwUnsupportedError()
   }
 
   public async contactAvatar (contactId: string)                : Promise<FileBox>
@@ -417,7 +437,7 @@ export class PuppetWechat4u extends Puppet {
     log.verbose('PuppetWechat4u', 'contactAvatar(%s)', contactId)
 
     if (file) {
-      throw new Error('not supported')
+      return throwUnsupportedError()
     }
 
     const rawPayload = await this.contactRawPayload(contactId)
@@ -607,6 +627,10 @@ export class PuppetWechat4u extends Puppet {
     throw new Error('unsupported message. id: ' + id)
   }
 
+  public async messageUrl (messageId: string)  : Promise<UrlLinkPayload> {
+    return throwUnsupportedError()
+  }
+
   public async messageRawPayload (id: string): Promise<WebMessageRawPayload> {
     log.verbose('PuppetWechat4u', 'messageRawPayload(%s)', id)
 
@@ -692,7 +716,11 @@ export class PuppetWechat4u extends Puppet {
     contactId : string,
   ): Promise<void> {
     log.verbose('PuppetWechat4u', 'messageSend("%s", %s)', JSON.stringify(receiver), contactId)
-    throw new Error('not support')
+    throwUnsupportedError()
+  }
+
+  public async messageSendUrl (to: Receiver, urlLinkPayload: UrlLinkPayload) : Promise<void> {
+    throwUnsupportedError()
   }
 
   public async messageForward (
@@ -719,6 +747,23 @@ export class PuppetWechat4u extends Puppet {
      * 如何直接转发消息
      */
     await this.wechat4u.forwardMsg(rawPayload, id)
+  }
+
+  /**
+   *
+   * Room Invitation
+   *
+   */
+  public async roomInvitationAccept (roomInvitationId: string): Promise<void> {
+    return throwUnsupportedError()
+  }
+
+  public async roomInvitationRawPayload (roomInvitationId: string): Promise<any> {
+    return throwUnsupportedError()
+  }
+
+  public async roomInvitationRawPayloadParser (rawPayload: any): Promise<RoomInvitationPayload> {
+    return throwUnsupportedError()
   }
 
   /**
@@ -862,20 +907,15 @@ export class PuppetWechat4u extends Puppet {
   public async roomAnnounce (roomId: string, text: string)  : Promise<void>
 
   public async roomAnnounce (roomId: string, text?: string) : Promise<void | string> {
-    log.warn('PuppetWechat4u', 'roomAnnounce(%s, %s) not supported', roomId, text ? text : '')
-
-    if (text) {
-      return
-    }
-    return ''
+    return throwUnsupportedError()
   }
 
   public async roomQuit (roomId: string): Promise<void> {
-    log.verbose('PuppetWechat4u', 'roomQuit(%s)', roomId)
+    return throwUnsupportedError()
   }
 
   public async roomQrcode (roomId: string): Promise<string> {
-    throw new Error('not support ' + roomId)
+    return throwUnsupportedError()
   }
 
   public async roomMemberList (roomId: string) : Promise<string[]> {

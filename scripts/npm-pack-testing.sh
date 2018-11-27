@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
+NPM_TAG=latest
+if [ ./development-release.ts ]; then
+  NPM_TAG=next
+fi
+
 npm run dist
 npm run pack
 
@@ -12,14 +17,14 @@ cp tests/fixtures/smoke-testing.ts "$TMPDIR"
 cd $TMPDIR
 npm init -y
 npm install *-*.*.*.tgz \
-  @types/lru-cache \
+  @types/quick-lru \
   @types/node \
   @types/normalize-package-data \
   @types/promise-retry \
   file-box \
   memory-card \
   typescript \
-  wechaty-puppet \
+  "wechaty-puppet@$NPM_TAG" \
 
 ./node_modules/.bin/tsc \
   --esModuleInterop \
