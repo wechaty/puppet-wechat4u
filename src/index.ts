@@ -16,14 +16,11 @@
  *   limitations under the License.
  *
  */
-// tslint:disable:no-reference
-/// <reference path="./typings.d.ts" />
-
+import { PuppetWechat4u } from './puppet-wechat4u'
 export {
   log,
   VERSION,
 }            from './config'
-import { PuppetWechat4u } from './puppet-wechat4u'
 
 export {
   PuppetWechat4u,

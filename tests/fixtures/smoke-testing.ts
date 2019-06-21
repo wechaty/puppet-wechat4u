@@ -10,13 +10,17 @@
 import {
   PuppetWechat4u,
   log,
+  VERSION,
 }                 from 'wechaty-puppet-wechat4u'
 
 log.level('silly')
 
 async function main () {
+  if (VERSION === '0.0.0') {
+    throw new Error('should set VERSION to real before publishing')
+  }
   const puppet = new PuppetWechat4u()
-  const future = new Promise(r => puppet.once('scan', r))
+  const future = new Promise(resolve => puppet.once('scan', resolve))
 
   await puppet.start()
   await future
@@ -30,8 +34,8 @@ async function main () {
 }
 
 main()
-.then(process.exit)
-.catch(e => {
-  console.error(e)
-  process.exit(1)
-})
+  .then(process.exit)
+  .catch(e => {
+    console.error(e)
+    process.exit(1)
+  })

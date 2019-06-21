@@ -92,6 +92,7 @@ import {
 const MEMORY_SLOT_NAME = 'PUPPET-WECHAT4U'
 
 export class PuppetWechat4u extends Puppet {
+
   public static readonly VERSION = VERSION
 
   /**
@@ -193,10 +194,10 @@ export class PuppetWechat4u extends Puppet {
         return
       }
       wechat4u.notifyMobile()
-      .catch((err: Error) => {
-        log.warn('PuppetWechat4u', 'monkeyPatch() wechat4u.checkPolling() notifyMobile() exception: %s', err)
-        wechat4u.emit('error', err)
-      })
+        .catch((err: Error) => {
+          log.warn('PuppetWechat4u', 'monkeyPatch() wechat4u.checkPolling() notifyMobile() exception: %s', err)
+          wechat4u.emit('error', err)
+        })
       clearTimeout(wechat4u.checkPollingId)
       wechat4u.checkPollingId = setTimeout(() => wechat4u.checkPolling(), wechat4u._getPollingInterval())
     }
@@ -294,9 +295,9 @@ export class PuppetWechat4u extends Puppet {
      */
     wechat4u.on('contacts-updated', (contacts: WebContactRawPayload[]) => {
       log.silly('PuppetWechat4u', 'initHookEvents() wechat4u.on(contacts-updated) new/total contacts.length=%d/%d',
-                                  contacts.length,
-                                  Object.keys(wechat4u.contacts).length,
-                )
+        contacts.length,
+        Object.keys(wechat4u.contacts).length,
+      )
     })
     /**
      * 错误事件，参数一般为Error对象
@@ -389,11 +390,11 @@ export class PuppetWechat4u extends Puppet {
   }
 
   public async contactSelfName (name: string): Promise<void> {
-    return throwUnsupportedError()
+    return throwUnsupportedError(name)
   }
 
   public async contactSelfSignature (signature: string): Promise<void> {
-    return throwUnsupportedError()
+    return throwUnsupportedError(signature)
   }
 
   /**
@@ -419,15 +420,15 @@ export class PuppetWechat4u extends Puppet {
     log.verbose('PuppetWechat4u', 'contactList()')
 
     const idList = this.wechat4u.contacts
-    .filter((contact: any) => !contact.isRoomContact())
-    .map(
-      (rawPayload: WebContactRawPayload) => rawPayload.UserName,
-    )
+      .filter((contact: any) => !contact.isRoomContact())
+      .map(
+        (rawPayload: WebContactRawPayload) => rawPayload.UserName,
+      )
     return idList
   }
 
   public async contactQrcode (contactId: string): Promise<string> {
-    return throwUnsupportedError()
+    return throwUnsupportedError(contactId)
   }
 
   public async contactAvatar (contactId: string)                : Promise<FileBox>
@@ -457,9 +458,9 @@ export class PuppetWechat4u extends Puppet {
 
   public async contactRawPayload (contactId: string): Promise<WebContactRawPayload> {
     log.verbose('PuppetWechat4u', 'contactRawPayload(%s) with contacts.length=%d',
-                                  contactId,
-                                  Object.keys(this.wechat4u.contacts).length,
-                )
+      contactId,
+      Object.keys(this.wechat4u.contacts).length,
+    )
 
     if (!(contactId in this.wechat4u.contacts)) {
       try {
@@ -472,8 +473,8 @@ export class PuppetWechat4u extends Puppet {
         const result = await this.wechat4u.batchGetContact(userDataList)
 
         log.silly('PuppetWechat4u', 'contactRawPayload(%s) wechat4u.batchGetContact() result: %s',
-                                    JSON.stringify(result),
-                  )
+          JSON.stringify(result),
+        )
 
         this.wechat4u.updateContacts(result)
       } catch (e) {
@@ -498,12 +499,12 @@ export class PuppetWechat4u extends Puppet {
     rawPayload: WebContactRawPayload,
   ): Promise<ContactPayload> {
     log.silly('PuppetWechat4u', 'contactParseRawPayload(Object.keys(payload).length=%d)',
-                                    Object.keys(rawPayload).length,
-                )
+      Object.keys(rawPayload).length,
+    )
     if (!Object.keys(rawPayload).length) {
       log.error('PuppetWechat4u', 'contactParseRawPayload(Object.keys(payload).length=%d)',
-                                    Object.keys(rawPayload).length,
-                )
+        Object.keys(rawPayload).length,
+      )
       log.error('PuppetWechat4u', 'contactParseRawPayload() got empty rawPayload!')
       throw new Error('empty raw payload')
       // return {
@@ -513,7 +514,7 @@ export class PuppetWechat4u extends Puppet {
     }
 
     // this.id = rawPayload.UserName   // MMActualSender??? MMPeerUserName???
-                                      // `getUserContact(message.MMActualSender,message.MMPeerUserName).HeadImgUrl`
+    // `getUserContact(message.MMActualSender,message.MMPeerUserName).HeadImgUrl`
     // uin:        rawPayload.Uin,    // stable id: 4763975 || getCookie("wxuin")
 
     return {
@@ -522,8 +523,8 @@ export class PuppetWechat4u extends Puppet {
       avatar:     rawPayload.HeadImgUrl,
       city:       rawPayload.City,
       friend:     rawPayload.stranger === undefined
-                    ? undefined
-                    : !rawPayload.stranger, // assign by injectio.js
+        ? undefined
+        : !rawPayload.stranger, // assign by injectio.js
       gender:     rawPayload.Sex,
       id:         rawPayload.UserName,
       name:       rawPayload.NickName || '',
@@ -540,8 +541,8 @@ export class PuppetWechat4u extends Puppet {
        */
       // tslint:disable-next-line
       type:      (!!rawPayload.UserName && !rawPayload.UserName.startsWith('@@') && !!(rawPayload.VerifyFlag & 8))
-                    ? ContactType.Official
-                    : ContactType.Personal,
+        ? ContactType.Official
+        : ContactType.Personal,
       /**
        * @see 1. https://github.com/Chatie/webwx-app-tracker/blob/7c59d35c6ea0cff38426a4c5c912a086c4c512b2/formatted/webwxApp.js#L3246
        * @ignore
@@ -577,6 +578,7 @@ export class PuppetWechat4u extends Puppet {
         /**
          * 表情消息
          */
+      // eslint-disable-next-lint no-fallthrough
       case this.wechat4u.CONF.MSGTYPE_IMAGE:
         /**
          * 图片消息
@@ -628,7 +630,7 @@ export class PuppetWechat4u extends Puppet {
   }
 
   public async messageUrl (messageId: string)  : Promise<UrlLinkPayload> {
-    return throwUnsupportedError()
+    return throwUnsupportedError(messageId)
   }
 
   public async messageRawPayload (id: string): Promise<WebMessageRawPayload> {
@@ -720,7 +722,7 @@ export class PuppetWechat4u extends Puppet {
   }
 
   public async messageSendUrl (to: Receiver, urlLinkPayload: UrlLinkPayload) : Promise<void> {
-    throwUnsupportedError()
+    throwUnsupportedError(to, urlLinkPayload)
   }
 
   public async messageForward (
@@ -728,9 +730,9 @@ export class PuppetWechat4u extends Puppet {
     messageId : string,
   ): Promise<void> {
     log.verbose('PuppetWechat4u', 'messageForward(%s, %s)',
-                              receiver,
-                              messageId,
-              )
+      receiver,
+      messageId,
+    )
     const rawPayload = await this.messageRawPayload(messageId)
 
     if (!rawPayload) {
@@ -755,15 +757,15 @@ export class PuppetWechat4u extends Puppet {
    *
    */
   public async roomInvitationAccept (roomInvitationId: string): Promise<void> {
-    return throwUnsupportedError()
+    return throwUnsupportedError(roomInvitationId)
   }
 
   public async roomInvitationRawPayload (roomInvitationId: string): Promise<any> {
-    return throwUnsupportedError()
+    return throwUnsupportedError(roomInvitationId)
   }
 
   public async roomInvitationRawPayloadParser (rawPayload: any): Promise<RoomInvitationPayload> {
-    return throwUnsupportedError()
+    return throwUnsupportedError(rawPayload)
   }
 
   /**
@@ -807,8 +809,8 @@ export class PuppetWechat4u extends Puppet {
     // }
 
     const memberIdList = rawPayload.MemberList
-                          ? rawPayload.MemberList.map(m => m.UserName)
-                          : []
+      ? rawPayload.MemberList.map(m => m.UserName)
+      : []
 
     const roomPayload: RoomPayload = {
       id,
@@ -823,10 +825,10 @@ export class PuppetWechat4u extends Puppet {
     log.verbose('PuppetWechat4u', 'roomList()')
 
     const idList = this.wechat4u.contacts
-    .filter((contact: any) => contact.isRoomContact())
-    .map(
-      (rawPayload: WebContactRawPayload) => rawPayload.UserName,
-    )
+      .filter((contact: any) => contact.isRoomContact())
+      .map(
+        (rawPayload: WebContactRawPayload) => rawPayload.UserName,
+      )
     return idList
   }
 
@@ -907,15 +909,15 @@ export class PuppetWechat4u extends Puppet {
   public async roomAnnounce (roomId: string, text: string)  : Promise<void>
 
   public async roomAnnounce (roomId: string, text?: string) : Promise<void | string> {
-    return throwUnsupportedError()
+    return throwUnsupportedError(roomId, text)
   }
 
   public async roomQuit (roomId: string): Promise<void> {
-    return throwUnsupportedError()
+    return throwUnsupportedError(roomId)
   }
 
   public async roomQrcode (roomId: string): Promise<string> {
-    return throwUnsupportedError()
+    return throwUnsupportedError(roomId)
   }
 
   public async roomMemberList (roomId: string) : Promise<string[]> {
@@ -923,7 +925,7 @@ export class PuppetWechat4u extends Puppet {
     const rawPayload = await this.roomRawPayload(roomId)
 
     const memberIdList = (rawPayload.MemberList || [])
-                          .map(member => member.UserName)
+      .map(member => member.UserName)
 
     return memberIdList
   }
@@ -1028,7 +1030,6 @@ export class PuppetWechat4u extends Puppet {
     log.silly('PuppetWechat4u', 'ding(%s)', data || '')
 
     this.emit('dong', data)
-    return
   }
 
   private isFriendConfirm (
@@ -1053,6 +1054,7 @@ export class PuppetWechat4u extends Puppet {
     super.unref()
     // TODO: unref wechat4u
   }
+
 }
 
 export default PuppetWechat4u
