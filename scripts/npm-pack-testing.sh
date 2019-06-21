@@ -17,13 +17,12 @@ cp tests/fixtures/smoke-testing.ts "$TMPDIR"
 cd $TMPDIR
 npm init -y
 npm install *-*.*.*.tgz \
+  @chatie/tsconfig \
   @types/quick-lru \
-  @types/node \
   @types/normalize-package-data \
   @types/promise-retry \
   file-box \
   memory-card \
-  typescript \
   "wechaty-puppet@$NPM_TAG" \
 
 ./node_modules/.bin/tsc \
