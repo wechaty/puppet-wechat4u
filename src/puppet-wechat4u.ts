@@ -19,7 +19,7 @@
 // tslint:disable:member-ordering
 // tslint:disable:arrow-parens
 
-import LRU from 'lru-cache'
+import LRUCache from 'lru-cache'
 
 import { FileBox }    from 'file-box'
 
@@ -106,14 +106,14 @@ export class PuppetWechat4u extends Puppet {
 
   private scanQrCode?: string
 
-  private readonly cacheMessageRawPayload: LRU.Cache<string, WebMessageRawPayload>
+  private readonly cacheMessageRawPayload: LRUCache<string, WebMessageRawPayload>
 
   constructor (
     public options: PuppetOptions = {},
   ) {
     super(options)
 
-    const lruOptions: LRU.Options = {
+    const lruOptions: LRUCache.Options<string, any> = {
       max: 10000,
       // length: function (n) { return n * 2},
       dispose (key: string, val: object) {
@@ -122,7 +122,7 @@ export class PuppetWechat4u extends Puppet {
       maxAge: 1000 * 60 * 60,
     }
 
-    this.cacheMessageRawPayload = new LRU<string, WebMessageRawPayload>(lruOptions)
+    this.cacheMessageRawPayload = new LRUCache<string, WebMessageRawPayload>(lruOptions)
   }
 
   public async start (): Promise<void> {
