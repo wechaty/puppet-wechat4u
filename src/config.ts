@@ -9,7 +9,7 @@ import {
 import { FileBox }  from 'file-box'
 import qrImage      from 'qr-image'
 
-import { WrapOptions } from 'retry'
+import { OperationOptions } from 'retry'
 import promiseRetry = require('promise-retry')
 
 // export const log = new Brolog()
@@ -42,7 +42,7 @@ export async function retry<T> (
   const retries    = 9
   // const unref      = true
 
-  const retryOptions: WrapOptions = {
+  const retryOptions: OperationOptions = {
     factor,
     maxTimeout,
     minTimeout,
