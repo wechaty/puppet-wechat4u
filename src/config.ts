@@ -6,8 +6,7 @@ import {
   // Brolog,
   log,
 }                   from 'brolog'
-import { FileBox }  from 'file-box'
-import qrImage      from 'qr-image'
+import { FileBox }  from 'wechaty-puppet'
 
 import { OperationOptions } from 'retry'
 import promiseRetry = require('promise-retry')
@@ -16,11 +15,7 @@ import promiseRetry = require('promise-retry')
 
 export function qrCodeForChatie (): FileBox {
   const CHATIE_OFFICIAL_ACCOUNT_QRCODE = 'http://weixin.qq.com/r/qymXj7DEO_1ErfTs93y5'
-  const name                           = 'qrcode-for-chatie.png'
-  const type                           = 'png'
-
-  const qrStream = qrImage.image(CHATIE_OFFICIAL_ACCOUNT_QRCODE, { type })
-  return FileBox.fromStream(qrStream, name)
+  return FileBox.fromQRCode(CHATIE_OFFICIAL_ACCOUNT_QRCODE)
 }
 
 export async function retry<T> (

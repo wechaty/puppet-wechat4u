@@ -19,7 +19,6 @@ npm init -y
 npm install *-*.*.*.tgz \
   @chatie/tsconfig \
   @types/quick-lru \
-  @types/normalize-package-data \
   @types/promise-retry \
   file-box \
   memory-card \

@@ -21,8 +21,6 @@
 
 import LRUCache from 'lru-cache'
 
-import { FileBox }    from 'file-box'
-
 import Wechat4u from 'wechat4u'
 
 import {
@@ -39,7 +37,7 @@ import {
   Puppet,
   PuppetOptions,
 
-  Receiver,
+  FileBox,
 
   RoomInvitationPayload,
 
@@ -50,6 +48,7 @@ import {
 
   UrlLinkPayload,
   MiniProgramPayload,
+  ImageType,
 }                         from 'wechaty-puppet'
 
 import {
@@ -115,11 +114,11 @@ export class PuppetWechat4u extends Puppet {
     super(options)
 
     const lruOptions: LRUCache.Options<string, any> = {
-      max: 10000,
       // length: function (n) { return n * 2},
       dispose (key: string, val: object) {
         log.silly('PuppetWechat4u', 'constructor() lruOptions.dispose(%s, %s)', key, JSON.stringify(val))
       },
+      max: 10000,
       maxAge: 1000 * 60 * 60,
     }
 
@@ -175,10 +174,7 @@ export class PuppetWechat4u extends Puppet {
       'syncCheck',
       () => {
         log.silly('PuppetWechat4u', 'monkeyPatch() monkeyPatchHook() wechat4u.syncCheck()')
-        this.emit('watchdog', {
-          data: 'syncCheck()',
-          type: 'wechat4u',
-        })
+        this.emit('watchdog', { data: 'syncCheck()' })
       },
     )
 
@@ -257,13 +253,17 @@ export class PuppetWechat4u extends Puppet {
       log.silly('PuppetWechat4u', 'initHookEvents() wechat4u.on(uuid)')
 
       this.scanQrCode = 'https://login.weixin.qq.com/l/' + uuid
-      this.emit('scan', this.scanQrCode, 0)
+      this.emit('scan', { qrcode: this.scanQrCode, status: 0 })
     })
     /**
      * 登录用户头像事件，手机扫描后可以得到登录用户头像的Data URL
      */
     wechat4u.on('user-avatar', (avatarDataUrl: string) => {
-      this.emit('scan', this.scanQrCode || '', 200, avatarDataUrl)
+      this.emit('scan', {
+        data: avatarDataUrl,
+        qrcode: this.scanQrCode || '',
+        status: 200,
+      })
     })
     /**
      * 登录成功事件
@@ -272,7 +272,7 @@ export class PuppetWechat4u extends Puppet {
       // FIXME: where's the logined user id?
       const userId = this.wechat4u.user.UserName
       if (!userId) {
-        this.emit('error', new Error('login event can not found selfId'))
+        this.emit('error', { data: 'login event can not found selfId' })
         return
       }
       await this.login(userId)
@@ -304,7 +304,7 @@ export class PuppetWechat4u extends Puppet {
      * 错误事件，参数一般为Error对象
      */
     wechat4u.on('error', (err: Error) => {
-      this.emit('error', err)
+      this.emit('error', { data: err.message || String(err) })
     })
 
     /**
@@ -325,18 +325,18 @@ export class PuppetWechat4u extends Puppet {
           break
 
         case WebMessageType.VERIFYMSG:
-          this.emit('friendship', msg.MsgId)
+          this.emit('friendship', { friendshipId: msg.MsgId })
           break
 
         case WebMessageType.SYS:
           if (this.isFriendConfirm(msg.Content)) {
-            this.emit('friendship', msg.MsgId)
+            this.emit('friendship', { friendshipId: msg.MsgId })
           }
-          this.emit('message', msg.MsgId)
+          this.emit('message', { messageId: msg.MsgId })
           break
 
         default:
-          this.emit('message', msg.MsgId)
+          this.emit('message', { messageId: msg.MsgId })
           break
       }
       /**
@@ -374,10 +374,42 @@ export class PuppetWechat4u extends Puppet {
       throw new Error('logout before login?')
     }
 
-    this.emit('logout', this.id) // becore we will throw above by logonoff() when this.user===undefined
+    this.emit('logout', {
+      contactId: this.id,
+      data: 'logout()',
+    }) // becore we will throw above by logonoff() when this.user===undefined
     this.id = undefined
 
     // TODO: do the logout job
+  }
+
+  public async ding (data: string): Promise<void> {
+    log.silly('PuppetWechat4u', 'ding(%s)', data || '')
+
+    this.emit('dong', { data })
+  }
+
+  private isFriendConfirm (
+    text: string,
+  ): boolean {
+    const friendConfirmRegexpList = [
+      /^You have added (.+) as your WeChat contact. Start chatting!$/,
+      /^你已添加了(.+)，现在可以开始聊天了。$/,
+      /^(.+) just added you to his\/her contacts list. Send a message to him\/her now!$/,
+      /^(.+)刚刚把你添加到通讯录，现在可以开始聊天了。$/,
+    ]
+
+    let found = false
+
+    friendConfirmRegexpList.some(re => !!(found = re.test(text)))
+
+    return found
+  }
+
+  public unref (): void {
+    log.verbose('PuppetWechat4u', 'unref()')
+    super.unref()
+    // TODO: unref wechat4u
   }
 
   /**
@@ -386,7 +418,7 @@ export class PuppetWechat4u extends Puppet {
    *
    *
    */
-  public async contactSelfQrcode (): Promise<string> {
+  public async contactSelfQRCode (): Promise<string> {
     return throwUnsupportedError()
   }
 
@@ -540,7 +572,7 @@ export class PuppetWechat4u extends Puppet {
        * @see 2. https://github.com/Urinx/WeixinBot/blob/master/README.md
        * @ignore
        */
-      // tslint:disable-next-line
+      // eslint-disable-next-line sort-keys
       type:      (!!rawPayload.UserName && !rawPayload.UserName.startsWith('@@') && !!(rawPayload.VerifyFlag & 8))
         ? ContactType.Official
         : ContactType.Personal,
@@ -557,6 +589,32 @@ export class PuppetWechat4u extends Puppet {
    * Message
    *
    */
+  public async messageContact (
+    messageId: string,
+  ): Promise<string> {
+    log.verbose('PuppetWechat4u', 'messageContact(%s)', messageId)
+    return throwUnsupportedError()
+  }
+
+  public async messageRecall (
+    messageId: string,
+  ): Promise<boolean> {
+    log.verbose('PuppetWechat4u', 'messageRecall(%s)', messageId)
+    return throwUnsupportedError()
+  }
+
+  public async messageImage (
+    messageId: string,
+    imageType: ImageType,
+  ) : Promise<FileBox> {
+    log.verbose('PuppetWechat4u', 'messageImage(%s, %s[%s])',
+      messageId,
+      imageType,
+      ImageType[imageType],
+    )
+    return throwUnsupportedError()
+  }
+
   public async messageFile (id: string): Promise<FileBox> {
     log.verbose('PuppetWechat4u', 'messageFile(%s)', id)
 
@@ -661,22 +719,15 @@ export class PuppetWechat4u extends Puppet {
   }
 
   public async messageSendText (
-    receiver : Receiver,
-    text     : string,
+    conversationId : string,
+    text           : string,
   ): Promise<void> {
-    log.verbose('PuppetWechat4u', 'messageSend(%s, %s)', receiver, text)
-
-    // room first
-    const id = receiver.roomId || receiver.contactId
-
-    if (!id) {
-      throw new Error('no id')
-    }
+    log.verbose('PuppetWechat4u', 'messageSend(%s, %s)', conversationId, text)
 
     /**
      * 发送文本消息，可以包含emoji(😒)和QQ表情([坏笑])
      */
-    await this.wechat4u.sendMsg(text, id)
+    await this.wechat4u.sendMsg(text, conversationId)
     /**
      * { BaseResponse: { Ret: 0, ErrMsg: '' },
      *  MsgID: '830582407297708303',
@@ -685,17 +736,10 @@ export class PuppetWechat4u extends Puppet {
   }
 
   public async messageSendFile (
-    receiver : Receiver,
-    file     : FileBox,
+    conversationId : string,
+    file           : FileBox,
   ): Promise<void> {
-    log.verbose('PuppetWechat4u', 'messageSend(%s, %s)', receiver, file)
-
-    // room first
-    const id = receiver.roomId || receiver.contactId
-
-    if (!id) {
-      throw new Error('no id')
-    }
+    log.verbose('PuppetWechat4u', 'messageSend(%s, %s)', conversationId, file)
 
     /**
      * 通过表情MD5发送表情
@@ -716,35 +760,35 @@ export class PuppetWechat4u extends Puppet {
     await this.wechat4u.sendMsg({
       file     : await file.toStream(),
       filename : file.name,
-    }, id)
+    }, conversationId)
   }
 
   public async messageSendContact (
-    receiver  : Receiver,
-    contactId : string,
+    conversationId : string,
+    contactId      : string,
   ): Promise<void> {
-    log.verbose('PuppetWechat4u', 'messageSend("%s", %s)', JSON.stringify(receiver), contactId)
+    log.verbose('PuppetWechat4u', 'messageSend("%s", %s)', conversationId, contactId)
     throwUnsupportedError()
   }
 
-  public async messageSendUrl (to: Receiver, urlLinkPayload: UrlLinkPayload) : Promise<void> {
-    throwUnsupportedError(to, urlLinkPayload)
+  public async messageSendUrl (conversationId: string, urlLinkPayload: UrlLinkPayload) : Promise<void> {
+    throwUnsupportedError(conversationId, urlLinkPayload)
   }
 
-  public async messageSendMiniProgram (receiver: Receiver, miniProgramPayload: MiniProgramPayload): Promise<void> {
+  public async messageSendMiniProgram (conversationId: string, miniProgramPayload: MiniProgramPayload): Promise<void> {
     log.verbose('PuppetWechat4u', 'messageSendMiniProgram("%s", %s)',
-      JSON.stringify(receiver),
+      JSON.stringify(conversationId),
       JSON.stringify(miniProgramPayload),
     )
-    throwUnsupportedError(receiver, miniProgramPayload)
+    throwUnsupportedError(conversationId, miniProgramPayload)
   }
 
   public async messageForward (
-    receiver  : Receiver,
-    messageId : string,
+    conversationid : string,
+    messageId      : string,
   ): Promise<void> {
     log.verbose('PuppetWechat4u', 'messageForward(%s, %s)',
-      receiver,
+      conversationid,
       messageId,
     )
     const rawPayload = await this.messageRawPayload(messageId)
@@ -753,16 +797,10 @@ export class PuppetWechat4u extends Puppet {
       throw new Error('no rawPayload')
     }
 
-    const id = receiver.roomId || receiver.contactId
-
-    if (!id) {
-      throw new Error('no id')
-    }
-
     /**
      * 如何直接转发消息
      */
-    await this.wechat4u.forwardMsg(rawPayload, id)
+    await this.wechat4u.forwardMsg(rawPayload, conversationid)
   }
 
   /**
@@ -827,6 +865,7 @@ export class PuppetWechat4u extends Puppet {
       : []
 
     const roomPayload: RoomPayload = {
+      adminIdList: [],
       id,
       memberIdList,
       topic : rawPayload.NickName || '',
@@ -930,7 +969,7 @@ export class PuppetWechat4u extends Puppet {
     return throwUnsupportedError(roomId)
   }
 
-  public async roomQrcode (roomId: string): Promise<string> {
+  public async roomQRCode (roomId: string): Promise<string> {
     return throwUnsupportedError(roomId)
   }
 
@@ -975,6 +1014,20 @@ export class PuppetWechat4u extends Puppet {
    * Friendship
    *
    */
+  public async friendshipSearchPhone (
+    phone: string,
+  ): Promise<null | string> {
+    log.verbose('PuppetWechat4u', 'friendshipSearchPhone(%s)', phone)
+    return throwUnsupportedError()
+  }
+
+  public async friendshipSearchWeixin (
+    weixin: string,
+  ): Promise<null | string> {
+    log.verbose('PuppetWechat4u', 'friendshipSearchWeixin(%s)', weixin)
+    return throwUnsupportedError()
+  }
+
   public async friendshipAdd (
     contactId : string,
     hello     : string,
@@ -1044,33 +1097,36 @@ export class PuppetWechat4u extends Puppet {
     }
   }
 
-  public async ding (data?: string): Promise<void> {
-    log.silly('PuppetWechat4u', 'ding(%s)', data || '')
-
-    this.emit('dong', data)
+  /**
+   *
+   * Tag
+   *
+   */
+  public async tagContactAdd (
+    tagId: string,
+    contactId: string,
+  ): Promise<void> {
+    log.verbose('PuppetWechat4u', 'tagContactAdd(%s)', tagId, contactId)
   }
 
-  private isFriendConfirm (
-    text: string,
-  ): boolean {
-    const friendConfirmRegexpList = [
-      /^You have added (.+) as your WeChat contact. Start chatting!$/,
-      /^你已添加了(.+)，现在可以开始聊天了。$/,
-      /^(.+) just added you to his\/her contacts list. Send a message to him\/her now!$/,
-      /^(.+)刚刚把你添加到通讯录，现在可以开始聊天了。$/,
-    ]
-
-    let found = false
-
-    friendConfirmRegexpList.some(re => !!(found = re.test(text)))
-
-    return found
+  public async tagContactRemove (
+    tagId: string,
+    contactId: string,
+  ): Promise<void> {
+    log.verbose('PuppetWechat4u', 'tagContactRemove(%s)', tagId, contactId)
   }
 
-  public unref (): void {
-    log.verbose('PuppetWechat4u', 'unref()')
-    super.unref()
-    // TODO: unref wechat4u
+  public async tagContactDelete (
+    tagId: string,
+  ): Promise<void> {
+    log.verbose('PuppetWechat4u', 'tagContactDelete(%s)', tagId)
+  }
+
+  public async tagContactList (
+    contactId?: string,
+  ): Promise<string[]> {
+    log.verbose('PuppetWechat4u', 'tagContactList(%s)', contactId)
+    return []
   }
 
 }

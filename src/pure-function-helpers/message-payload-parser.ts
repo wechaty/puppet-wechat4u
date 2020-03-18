@@ -25,10 +25,11 @@ export function messageRawPayloadParser (
    * 0. Set Message Type
    */
   const payloadBase = {
-    filename  : messageFileName(rawPayload) || undefined,
-    id        : rawPayload.MsgId,
-    timestamp : rawPayload.CreateTime,  // unix timestamp, in seconds
-    type      : messageType(rawPayload),
+    filename      : messageFileName(rawPayload) || undefined,
+    id            : rawPayload.MsgId,
+    mentionIdList : [],
+    timestamp     : rawPayload.CreateTime,                      // unix timestamp, in seconds
+    type          : messageType(rawPayload),
   }
 
   let fromId: undefined | string
