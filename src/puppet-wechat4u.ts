@@ -49,6 +49,7 @@ import {
   UrlLinkPayload,
   MiniProgramPayload,
   ImageType,
+  ScanStatus,
 }                         from 'wechaty-puppet'
 
 import {
@@ -253,7 +254,7 @@ export class PuppetWechat4u extends Puppet {
       log.silly('PuppetWechat4u', 'initHookEvents() wechat4u.on(uuid)')
 
       this.scanQrCode = 'https://login.weixin.qq.com/l/' + uuid
-      this.emit('scan', { qrcode: this.scanQrCode, status: 0 })
+      this.emit('scan', { qrcode: this.scanQrCode, status: ScanStatus.Waiting })
     })
     /**
      * 登录用户头像事件，手机扫描后可以得到登录用户头像的Data URL
@@ -262,7 +263,7 @@ export class PuppetWechat4u extends Puppet {
       this.emit('scan', {
         data: avatarDataUrl,
         qrcode: this.scanQrCode || '',
-        status: 200,
+        status: ScanStatus.Scanned,
       })
     })
     /**
