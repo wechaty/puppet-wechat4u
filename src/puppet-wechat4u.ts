@@ -50,10 +50,11 @@ import {
   MiniProgramPayload,
   ImageType,
   ScanStatus,
+
+  log,
 }                         from 'wechaty-puppet'
 
 import {
-  log,
   qrCodeForChatie,
   retry,
   VERSION,

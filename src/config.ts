@@ -3,15 +3,12 @@
 /// <reference path="./typings.d.ts" />
 
 import {
-  // Brolog,
+  FileBox,
   log,
-}                   from 'brolog'
-import { FileBox }  from 'wechaty-puppet'
+}             from 'wechaty-puppet'
 
 import { OperationOptions } from 'retry'
 import promiseRetry = require('promise-retry')
-
-// export const log = new Brolog()
 
 export function qrCodeForChatie (): FileBox {
   const CHATIE_OFFICIAL_ACCOUNT_QRCODE = 'http://weixin.qq.com/r/qymXj7DEO_1ErfTs93y5'
