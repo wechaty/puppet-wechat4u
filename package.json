@@ -1,6 +1,6 @@
 {
   "name": "wechaty-puppet-wechat4u",
-  "version": "0.17.4",
+  "version": "0.17.5",
   "description": "Wechat4u Puppet for Wechaty",
   "main": "dist/src/index.js",
   "typings": "dist/src/index.d.ts",
@@ -51,7 +51,7 @@
     "wechaty-puppet": "^0.21.12"
   },
   "peerDependencies": {
-    "wechaty-puppet": "^0.21.12"
+    "wechaty-puppet": ">=0.21"
   },
   "homepage": "https://github.com/zixia/wechaty-puppet-wechat4u#readme",
   "dependencies": {
