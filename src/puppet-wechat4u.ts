@@ -1132,13 +1132,13 @@ export class PuppetWechat4u extends Puppet {
     return []
   }
 
-  public contactCorporationRemark (...args: any[]) {
+  public contactCorporationRemark (..._: any[]) {
     return throwUnsupportedError()
   }
-  public contactDescription (...args: any[]) {
+  public contactDescription (..._: any[]) {
     return throwUnsupportedError()
   }
-  public contactPhone (...args: any[]) {
+  public contactPhone (..._: any[]) {
     return throwUnsupportedError()
   }
 

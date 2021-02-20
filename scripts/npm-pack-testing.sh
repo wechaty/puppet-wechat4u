@@ -18,14 +18,12 @@ cd $TMPDIR
 npm init -y
 npm install *-*.*.*.tgz \
   @chatie/tsconfig \
-  @types/promise-retry \
-  file-box \
-  memory-card \
   "wechaty-puppet@$NPM_TAG" \
 
 ./node_modules/.bin/tsc \
   --esModuleInterop \
   --lib esnext \
+  --lib dom \
   --skipLibCheck \
   --noEmitOnError \
   --noImplicitAny \
