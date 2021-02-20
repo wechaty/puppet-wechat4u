@@ -176,7 +176,7 @@ export class PuppetWechat4u extends Puppet {
       'syncCheck',
       () => {
         log.silly('PuppetWechat4u', 'monkeyPatch() monkeyPatchHook() wechat4u.syncCheck()')
-        this.emit('watchdog', { data: 'syncCheck()' })
+        this.emit('heartbeat', { data: 'syncCheck()' })
       },
     )
 
@@ -563,6 +563,7 @@ export class PuppetWechat4u extends Puppet {
       gender:     rawPayload.Sex,
       id:         rawPayload.UserName,
       name:       rawPayload.NickName || '',
+      phone:      [],
       province:   rawPayload.Province,
       signature:  rawPayload.Signature,
       star:       !!rawPayload.StarFriend,
@@ -577,7 +578,7 @@ export class PuppetWechat4u extends Puppet {
       // eslint-disable-next-line sort-keys
       type:      (!!rawPayload.UserName && !rawPayload.UserName.startsWith('@@') && !!(rawPayload.VerifyFlag & 8))
         ? ContactType.Official
-        : ContactType.Personal,
+        : ContactType.Individual,
       /**
        * @see 1. https://github.com/Chatie/webwx-app-tracker/blob/7c59d35c6ea0cff38426a4c5c912a086c4c512b2/formatted/webwxApp.js#L3246
        * @ignore
@@ -1129,6 +1130,16 @@ export class PuppetWechat4u extends Puppet {
   ): Promise<string[]> {
     log.verbose('PuppetWechat4u', 'tagContactList(%s)', contactId)
     return []
+  }
+
+  public contactCorporationRemark (...args: any[]) {
+    return throwUnsupportedError()
+  }
+  public contactDescription (...args: any[]) {
+    return throwUnsupportedError()
+  }
+  public contactPhone (...args: any[]) {
+    return throwUnsupportedError()
   }
 
 }

@@ -25,6 +25,18 @@ If you want to break the above limitations, please consider to use a Wechaty Pup
 
 Learn more about the Puppet at [Wechaty wiki: Puppet](https://github.com/Chatie/wechaty/wiki/Puppet)
 
+## HISTORY
+
+### master
+
+### v0.18 (Feb 20, 2021)
+
+Fix `wechaty-puppet` dependencies
+
+### v0.0.1 (Jun 30, 2018)
+
+Init version
+
 ## AUTHOR
 
 [Huan LI](http://linkedin.com/in/zixia) \<zixia@zixia.net\>
