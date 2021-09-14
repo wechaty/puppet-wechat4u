@@ -64,7 +64,6 @@
   "dependencies": {
     "lru-cache": "^6.0.0",
     "promise-retry": "^2.0.1",
-    "watchdog": "^0.8.17",
     "wechat4u": "^0.7.7"
   },
   "publishConfig": {
