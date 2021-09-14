@@ -1,21 +1,21 @@
-import {
+import type {
   MessagePayload,
 }                           from 'wechaty-puppet'
 
-import {
+import type {
   WebMessageRawPayload,
-}                           from '../web-schemas'
+}                           from '../web-schemas.js'
 
 import {
   isContactId,
   isRoomId,
-}                   from './is-type'
+}                   from './is-type.js'
 import {
   messageFileName,
-}                   from './message-file-name'
+}                   from './message-file-name.js'
 import {
   messageType,
-}                     from './message-type'
+}                     from './message-type.js'
 
 export function messageRawPayloadParser (
   rawPayload: WebMessageRawPayload,
@@ -73,7 +73,7 @@ export function messageRawPayloadParser (
   } else {
     const parts = rawPayload.Content.split(':\n')
     if (parts && parts.length > 1) {
-      if (isContactId(parts[0])) {
+      if (isContactId(parts[0]!)) {
 
         fromId = parts[0]
 

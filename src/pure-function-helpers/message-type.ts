@@ -5,7 +5,7 @@ import {
 import {
   WebMessageRawPayload,
   WebMessageType,
-}                     from '../web-schemas'
+}                     from '../web-schemas.js'
 
 export function messageType (
   rawPayload: WebMessageRawPayload,

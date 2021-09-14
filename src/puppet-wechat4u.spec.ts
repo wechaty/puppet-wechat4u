@@ -1,14 +1,13 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env -S node --no-warnings --loader ts-node/esm
 
-// tslint:disable:no-shadowed-variable
-import test  from 'blue-tape'
+import { test } from 'tstest'
 
-import { PuppetWechat4u } from './puppet-wechat4u'
+import { PuppetWechat4u } from './puppet-wechat4u.js'
 
 class PuppetWechat4uTest extends PuppetWechat4u {
 }
 
-test('PuppetWechat4u restart without problem', async (t) => {
+test('PuppetWechat4u restart without problem', async t => {
   const puppet = new PuppetWechat4uTest()
   try {
     for (let i = 0; i < 3; i++) {
@@ -18,6 +17,6 @@ test('PuppetWechat4u restart without problem', async (t) => {
     }
     t.pass('PuppetWechat4u() start/restart successed.')
   } catch (e) {
-    t.fail(e)
+    t.fail(e as any)
   }
 })

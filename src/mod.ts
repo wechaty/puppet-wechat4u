@@ -16,11 +16,11 @@
  *   limitations under the License.
  *
  */
-import { PuppetWechat4u } from './puppet-wechat4u'
+import { PuppetWechat4u } from './puppet-wechat4u.js'
 export {
   log,
   VERSION,
-}            from './config'
+}            from './config.js'
 
 export {
   PuppetWechat4u,

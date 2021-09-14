@@ -58,7 +58,7 @@ import {
   qrCodeForChatie,
   retry,
   VERSION,
-}                       from './config'
+}                       from './config.js'
 
 import {
   WebContactRawPayload,
@@ -67,11 +67,11 @@ import {
   WebRecomendInfo,
   WebRoomRawMember,
   WebRoomRawPayload,
-}                           from './web-schemas'
+}                           from './web-schemas.js'
 
 import {
   messageRawPayloadParser,
-}                           from './pure-function-helpers'
+}                           from './pure-function-helpers/mod.js'
 
 // export interface Wechat4uContactRawPayload {
 //   name : string,
@@ -95,7 +95,7 @@ const MEMORY_SLOT_NAME = 'PUPPET-WECHAT4U'
 
 export class PuppetWechat4u extends Puppet {
 
-  public static readonly VERSION = VERSION
+  public static override readonly VERSION = VERSION
 
   /**
    * Wecaht4u
@@ -111,7 +111,7 @@ export class PuppetWechat4u extends Puppet {
   private readonly cacheMessageRawPayload: LRUCache<string, WebMessageRawPayload>
 
   constructor (
-    public options: PuppetOptions = {},
+    public override options: PuppetOptions = {},
   ) {
     super(options)
 
@@ -127,7 +127,7 @@ export class PuppetWechat4u extends Puppet {
     this.cacheMessageRawPayload = new LRUCache<string, WebMessageRawPayload>(lruOptions)
   }
 
-  public async start (): Promise<void> {
+  override async start (): Promise<void> {
     log.verbose('PuppetWechat4u', `start() with ${this.memory.name}`)
 
     this.state.on('pending')
@@ -274,7 +274,7 @@ export class PuppetWechat4u extends Puppet {
       // FIXME: where's the logined user id?
       const userId = this.wechat4u.user.UserName
       if (!userId) {
-        this.emit('error', { data: 'login event can not found selfId' })
+        this.emit('error', { ...new Error('login event can not found selfId') })
         return
       }
       await this.login(userId)
@@ -306,7 +306,7 @@ export class PuppetWechat4u extends Puppet {
      * 错误事件，参数一般为Error对象
      */
     wechat4u.on('error', (err: Error) => {
-      this.emit('error', { data: err.message || String(err) })
+      this.emit('error', { ...err })
     })
 
     /**
@@ -352,7 +352,7 @@ export class PuppetWechat4u extends Puppet {
     })
   }
 
-  public async stop (): Promise<void> {
+  override async stop (): Promise<void> {
     log.verbose('PuppetWechat4u', 'stop()')
 
     if (this.state.off()) {
@@ -369,7 +369,7 @@ export class PuppetWechat4u extends Puppet {
     this.state.off(true)
   }
 
-  public async logout (): Promise<void> {
+  override async logout (): Promise<void> {
     log.verbose('PuppetWechat4u', 'logout()')
 
     if (!this.id) {
@@ -408,7 +408,7 @@ export class PuppetWechat4u extends Puppet {
     return found
   }
 
-  public unref (): void {
+  override unref (): void {
     log.verbose('PuppetWechat4u', 'unref()')
     super.unref()
     // TODO: unref wechat4u
@@ -806,6 +806,13 @@ export class PuppetWechat4u extends Puppet {
     await this.wechat4u.forwardMsg(rawPayload, conversationid)
   }
 
+  async conversationReadMark (
+    conversationId: string,
+    hasRead?: boolean
+  ) : Promise<void | boolean> {
+    return throwUnsupportedError(conversationId, hasRead)
+  }
+
   /**
    *
    * Room Invitation
@@ -994,7 +1001,7 @@ export class PuppetWechat4u extends Puppet {
 
     const memberPayloadResult = memberPayloadList.filter(payload => payload.UserName === contactId)
     if (memberPayloadResult.length > 0) {
-      return memberPayloadResult[0]
+      return memberPayloadResult[0]!
     } else {
       throw new Error('not found')
     }
@@ -1066,7 +1073,7 @@ export class PuppetWechat4u extends Puppet {
     const timestamp = Math.floor(Date.now() / 1000) // in seconds
 
     switch (rawPayload.MsgType) {
-      case WebMessageType.VERIFYMSG:
+      case WebMessageType.VERIFYMSG: {
         if (!rawPayload.RecommendInfo) {
           throw new Error('no RecommendInfo')
         }
@@ -1085,8 +1092,8 @@ export class PuppetWechat4u extends Puppet {
           type      : FriendshipType.Receive,
         }
         return payloadReceive
-
-      case WebMessageType.SYS:
+      }
+      case WebMessageType.SYS: {
         const payloadConfirm: FriendshipPayloadConfirm = {
           contactId : rawPayload.FromUserName,
           id        : rawPayload.MsgId,
@@ -1094,7 +1101,7 @@ export class PuppetWechat4u extends Puppet {
           type      : FriendshipType.Confirm,
         }
         return payloadConfirm
-
+      }
       default:
         throw new Error('not supported friend request message raw payload')
     }
@@ -1135,9 +1142,11 @@ export class PuppetWechat4u extends Puppet {
   public contactCorporationRemark (..._: any[]) {
     return throwUnsupportedError()
   }
+
   public contactDescription (..._: any[]) {
     return throwUnsupportedError()
   }
+
   public contactPhone (..._: any[]) {
     return throwUnsupportedError()
   }
