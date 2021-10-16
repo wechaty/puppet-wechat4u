@@ -27,7 +27,9 @@ Learn more about the Puppet at [Wechaty wiki: Puppet](https://github.com/Chatie/
 
 ## HISTORY
 
-### master v0.19 (Sep 14, 2021)
+### master
+
+### v0.20 (Sep 14, 2021)
 
 1. ES Modules support
 
