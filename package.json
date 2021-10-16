@@ -11,8 +11,8 @@
   },
   "types": "./dist/esm/src/mod.d.ts",
   "engines": {
-    "wechaty": ">=0.69",
-    "node": ">=14"
+    "wechaty": ">=0.68",
+    "node": ">=16"
   },
   "scripts": {
     "build": "tsc && tsc -p tsconfig.cjs.json",
@@ -59,6 +59,9 @@
     "shx": "^0.3.3",
     "tstest": "^0.5.16",
     "wechaty": "^0.69.47"
+  },
+  "peerDependencies": {
+    "wechaty-puppet": ">=0.40"
   },
   "homepage": "https://github.com/wechaty/wechaty-puppet-wechat4u#readme",
   "dependencies": {

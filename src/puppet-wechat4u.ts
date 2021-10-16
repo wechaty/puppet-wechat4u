@@ -16,9 +16,6 @@
  *   limitations under the License.
  *
  */
-// tslint:disable:member-ordering
-// tslint:disable:arrow-parens
-
 import LRUCache from 'lru-cache'
 
 import Wechat4u from 'wechat4u'
@@ -52,6 +49,7 @@ import {
   ScanStatus,
 
   log,
+  LocationPayload,
 }                         from 'wechaty-puppet'
 
 import {
@@ -1149,6 +1147,17 @@ export class PuppetWechat4u extends Puppet {
 
   public contactPhone (..._: any[]) {
     return throwUnsupportedError()
+  }
+
+  async messageLocation (messageId: string): Promise<LocationPayload> {
+    return throwUnsupportedError(messageId)
+  }
+
+  async messageSendLocation (
+    conversationId: string,
+    locationPayload: LocationPayload,
+  ): Promise<void | string> {
+    return throwUnsupportedError(conversationId, locationPayload)
   }
 
 }
