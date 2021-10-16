@@ -16,9 +16,8 @@
  *   limitations under the License.
  *
  */
-import LRUCache from 'lru-cache'
-
 import Wechat4u from 'wechat4u'
+import QuickLru from '@alloc/quick-lru'
 
 import {
   ContactPayload,
@@ -93,7 +92,7 @@ const MEMORY_SLOT_NAME = 'PUPPET-WECHAT4U'
 
 export class PuppetWechat4u extends Puppet {
 
-  public static override readonly VERSION = VERSION
+  static override readonly VERSION = VERSION
 
   /**
    * Wecaht4u
@@ -106,27 +105,29 @@ export class PuppetWechat4u extends Puppet {
 
   private scanQrCode?: string
 
-  private readonly cacheMessageRawPayload: LRUCache<string, WebMessageRawPayload>
+  private readonly cacheMessageRawPayload: QuickLru<string, WebMessageRawPayload>
 
   constructor (
-    public override options: PuppetOptions = {},
+    override options: PuppetOptions = {},
   ) {
     super(options)
 
-    const lruOptions: LRUCache.Options<string, any> = {
-      // length: function (n) { return n * 2},
-      dispose (key: string, val: object) {
+    const lruOptions: QuickLru.Options<string, any> = {
+      maxAge: 1000 * 60 * 60,
+      maxSize: 10000,
+      onEviction (key: string, val: object) {
         log.silly('PuppetWechat4u', 'constructor() lruOptions.dispose(%s, %s)', key, JSON.stringify(val))
       },
-      max: 10000,
-      maxAge: 1000 * 60 * 60,
     }
 
-    this.cacheMessageRawPayload = new LRUCache<string, WebMessageRawPayload>(lruOptions)
+    this.cacheMessageRawPayload = new QuickLru<string, WebMessageRawPayload>(lruOptions)
   }
 
+  async tryStart () { throw new Error('not implement') }
+  async tryStop () { throw new Error('not implement') }
+
   override async start (): Promise<void> {
-    log.verbose('PuppetWechat4u', `start() with ${this.memory.name}`)
+    log.verbose('PuppetWechat4u', 'start() with %s', this.memory.name || 'NONAME')
 
     this.state.on('pending')
 
@@ -134,7 +135,16 @@ export class PuppetWechat4u extends Puppet {
       log.warn('PuppetWechat4u', 'start() wechat4u exist, will be overwrited')
     }
 
+    /**
+     * Huan(202110): rename `start()` to `tryStart()`
+     *  then we will be able to use `MemoryMixin`
+     *  to init MemoryCard for the child puppet
+     */
+    await this.memory.load()
+    // console.info('faint 1')
     const syncData = await this.memory.get(MEMORY_SLOT_NAME)
+    // console.info('faint 2')
+
     if (syncData) {
       this.wechat4u = new Wechat4u(syncData)
     } else {
@@ -367,23 +377,7 @@ export class PuppetWechat4u extends Puppet {
     this.state.off(true)
   }
 
-  override async logout (): Promise<void> {
-    log.verbose('PuppetWechat4u', 'logout()')
-
-    if (!this.id) {
-      throw new Error('logout before login?')
-    }
-
-    this.emit('logout', {
-      contactId: this.id,
-      data: 'logout()',
-    }) // becore we will throw above by logonoff() when this.user===undefined
-    this.id = undefined
-
-    // TODO: do the logout job
-  }
-
-  public async ding (data: string): Promise<void> {
+  override async ding (data: string): Promise<void> {
     log.silly('PuppetWechat4u', 'ding(%s)', data || '')
 
     this.emit('dong', { data })
@@ -406,27 +400,21 @@ export class PuppetWechat4u extends Puppet {
     return found
   }
 
-  override unref (): void {
-    log.verbose('PuppetWechat4u', 'unref()')
-    super.unref()
-    // TODO: unref wechat4u
-  }
-
   /**
    *
    * ContactSelf
    *
    *
    */
-  public async contactSelfQRCode (): Promise<string> {
+  override async contactSelfQRCode (): Promise<string> {
     return throwUnsupportedError()
   }
 
-  public async contactSelfName (name: string): Promise<void> {
+  override async contactSelfName (name: string): Promise<void> {
     return throwUnsupportedError(name)
   }
 
-  public async contactSelfSignature (signature: string): Promise<void> {
+  override async contactSelfSignature (signature: string): Promise<void> {
     return throwUnsupportedError(signature)
   }
 
@@ -435,10 +423,10 @@ export class PuppetWechat4u extends Puppet {
    * Contact
    *
    */
-  public contactAlias (contactId: string)                      : Promise<string>
-  public contactAlias (contactId: string, alias: null | string): Promise<void>
+  override contactAlias (contactId: string)                      : Promise<string>
+  override contactAlias (contactId: string, alias: null | string): Promise<void>
 
-  public async contactAlias (contactId: string, alias?: null | string): Promise<void | string> {
+  override async contactAlias (contactId: string, alias?: null | string): Promise<void | string> {
     log.verbose('PuppetWechat4u', 'contactAlias(%s, %s)', contactId, alias)
 
     if (typeof alias === 'undefined') {
@@ -449,7 +437,7 @@ export class PuppetWechat4u extends Puppet {
     await this.wechat4u.updateRemarkName(contactId, alias)
   }
 
-  public async contactList (): Promise<string[]> {
+  override async contactList (): Promise<string[]> {
     log.verbose('PuppetWechat4u', 'contactList()')
 
     const idList = this.wechat4u.contacts
@@ -460,14 +448,14 @@ export class PuppetWechat4u extends Puppet {
     return idList
   }
 
-  public async contactQrcode (contactId: string): Promise<string> {
-    return throwUnsupportedError(contactId)
-  }
+  // override async contactQrCode (contactId: string): Promise<string> {
+  //   return throwUnsupportedError(contactId)
+  // }
 
-  public async contactAvatar (contactId: string)                : Promise<FileBox>
-  public async contactAvatar (contactId: string, file: FileBox) : Promise<void>
+  override async contactAvatar (contactId: string)                : Promise<FileBox>
+  override async contactAvatar (contactId: string, file: FileBox) : Promise<void>
 
-  public async contactAvatar (contactId: string, file?: FileBox): Promise<void | FileBox> {
+  override async contactAvatar (contactId: string, file?: FileBox): Promise<void | FileBox> {
     log.verbose('PuppetWechat4u', 'contactAvatar(%s)', contactId)
 
     if (file) {
@@ -489,7 +477,7 @@ export class PuppetWechat4u extends Puppet {
     )
   }
 
-  public async contactRawPayload (contactId: string): Promise<WebContactRawPayload> {
+  override async contactRawPayload (contactId: string): Promise<WebContactRawPayload> {
     log.verbose('PuppetWechat4u', 'contactRawPayload(%s) with contacts.length=%d',
       contactId,
       Object.keys(this.wechat4u.contacts).length,
@@ -528,7 +516,7 @@ export class PuppetWechat4u extends Puppet {
     return rawPayload
   }
 
-  public async contactRawPayloadParser (
+  override async contactRawPayloadParser (
     rawPayload: WebContactRawPayload,
   ): Promise<ContactPayload> {
     log.silly('PuppetWechat4u', 'contactParseRawPayload(Object.keys(payload).length=%d)',
@@ -590,21 +578,21 @@ export class PuppetWechat4u extends Puppet {
    * Message
    *
    */
-  public async messageContact (
+  override async messageContact (
     messageId: string,
   ): Promise<string> {
     log.verbose('PuppetWechat4u', 'messageContact(%s)', messageId)
     return throwUnsupportedError()
   }
 
-  public async messageRecall (
+  override async messageRecall (
     messageId: string,
   ): Promise<boolean> {
     log.verbose('PuppetWechat4u', 'messageRecall(%s)', messageId)
     return throwUnsupportedError()
   }
 
-  public async messageImage (
+  override async messageImage (
     messageId: string,
     imageType: ImageType,
   ) : Promise<FileBox> {
@@ -616,7 +604,7 @@ export class PuppetWechat4u extends Puppet {
     return throwUnsupportedError()
   }
 
-  public async messageFile (id: string): Promise<FileBox> {
+  override async messageFile (id: string): Promise<FileBox> {
     log.verbose('PuppetWechat4u', 'messageFile(%s)', id)
 
     const payload = await this.messagePayload(id)
@@ -689,16 +677,16 @@ export class PuppetWechat4u extends Puppet {
     throw new Error('unsupported message. id: ' + id)
   }
 
-  public async messageUrl (messageId: string)  : Promise<UrlLinkPayload> {
+  override async messageUrl (messageId: string)  : Promise<UrlLinkPayload> {
     return throwUnsupportedError(messageId)
   }
 
-  public async messageMiniProgram (messageId: string): Promise<MiniProgramPayload> {
+  override async messageMiniProgram (messageId: string): Promise<MiniProgramPayload> {
     log.verbose('PuppetWechat4u', 'messageMiniProgram(%s)', messageId)
     return throwUnsupportedError(messageId)
   }
 
-  public async messageRawPayload (id: string): Promise<WebMessageRawPayload> {
+  override async messageRawPayload (id: string): Promise<WebMessageRawPayload> {
     log.verbose('PuppetWechat4u', 'messageRawPayload(%s)', id)
 
     const rawPayload = this.cacheMessageRawPayload.get(id)
@@ -709,7 +697,7 @@ export class PuppetWechat4u extends Puppet {
     return rawPayload
   }
 
-  public async messageRawPayloadParser (
+  override async messageRawPayloadParser (
     rawPayload: WebMessageRawPayload,
   ): Promise<MessagePayload> {
     log.verbose('PuppetWechat4u', 'messageRawPayloadParser(%s) @ %s', rawPayload, this)
@@ -719,7 +707,7 @@ export class PuppetWechat4u extends Puppet {
     return payload
   }
 
-  public async messageSendText (
+  override async messageSendText (
     conversationId : string,
     text           : string,
   ): Promise<void> {
@@ -736,7 +724,7 @@ export class PuppetWechat4u extends Puppet {
      */
   }
 
-  public async messageSendFile (
+  override async messageSendFile (
     conversationId : string,
     file           : FileBox,
   ): Promise<void> {
@@ -764,7 +752,7 @@ export class PuppetWechat4u extends Puppet {
     }, conversationId)
   }
 
-  public async messageSendContact (
+  override async messageSendContact (
     conversationId : string,
     contactId      : string,
   ): Promise<void> {
@@ -772,11 +760,11 @@ export class PuppetWechat4u extends Puppet {
     throwUnsupportedError()
   }
 
-  public async messageSendUrl (conversationId: string, urlLinkPayload: UrlLinkPayload) : Promise<void> {
+  override async messageSendUrl (conversationId: string, urlLinkPayload: UrlLinkPayload) : Promise<void> {
     throwUnsupportedError(conversationId, urlLinkPayload)
   }
 
-  public async messageSendMiniProgram (conversationId: string, miniProgramPayload: MiniProgramPayload): Promise<void> {
+  override async messageSendMiniProgram (conversationId: string, miniProgramPayload: MiniProgramPayload): Promise<void> {
     log.verbose('PuppetWechat4u', 'messageSendMiniProgram("%s", %s)',
       JSON.stringify(conversationId),
       JSON.stringify(miniProgramPayload),
@@ -784,7 +772,7 @@ export class PuppetWechat4u extends Puppet {
     throwUnsupportedError(conversationId, miniProgramPayload)
   }
 
-  public async messageForward (
+  override async messageForward (
     conversationid : string,
     messageId      : string,
   ): Promise<void> {
@@ -804,7 +792,7 @@ export class PuppetWechat4u extends Puppet {
     await this.wechat4u.forwardMsg(rawPayload, conversationid)
   }
 
-  async conversationReadMark (
+  override async conversationReadMark (
     conversationId: string,
     hasRead?: boolean
   ) : Promise<void | boolean> {
@@ -816,15 +804,15 @@ export class PuppetWechat4u extends Puppet {
    * Room Invitation
    *
    */
-  public async roomInvitationAccept (roomInvitationId: string): Promise<void> {
+  override async roomInvitationAccept (roomInvitationId: string): Promise<void> {
     return throwUnsupportedError(roomInvitationId)
   }
 
-  public async roomInvitationRawPayload (roomInvitationId: string): Promise<any> {
+  override async roomInvitationRawPayload (roomInvitationId: string): Promise<any> {
     return throwUnsupportedError(roomInvitationId)
   }
 
-  public async roomInvitationRawPayloadParser (rawPayload: any): Promise<RoomInvitationPayload> {
+  override async roomInvitationRawPayloadParser (rawPayload: any): Promise<RoomInvitationPayload> {
     return throwUnsupportedError(rawPayload)
   }
 
@@ -833,7 +821,7 @@ export class PuppetWechat4u extends Puppet {
    * Room
    *
    */
-  public async roomRawPayload (
+  override async roomRawPayload (
     id: string,
   ): Promise<WebRoomRawPayload> {
     log.verbose('PuppetWechat4u', 'roomRawPayload(%s)', id)
@@ -851,7 +839,7 @@ export class PuppetWechat4u extends Puppet {
     return rawPayload
   }
 
-  public async roomRawPayloadParser (
+  override async roomRawPayloadParser (
     rawPayload: WebRoomRawPayload,
   ): Promise<RoomPayload> {
     log.verbose('PuppetWechat4u', 'roomRawPayloadParser(%s)', rawPayload)
@@ -882,7 +870,7 @@ export class PuppetWechat4u extends Puppet {
     return roomPayload
   }
 
-  public async roomList (): Promise<string[]> {
+  override async roomList (): Promise<string[]> {
     log.verbose('PuppetWechat4u', 'roomList()')
 
     const idList = this.wechat4u.contacts
@@ -893,7 +881,7 @@ export class PuppetWechat4u extends Puppet {
     return idList
   }
 
-  public async roomDel (
+  override async roomDel (
     roomId    : string,
     contactId : string,
   ): Promise<void> {
@@ -904,7 +892,7 @@ export class PuppetWechat4u extends Puppet {
     await this.wechat4u.updateChatroom(roomId, [contactId], type)
   }
 
-  public async roomAvatar (roomId: string): Promise<FileBox> {
+  override async roomAvatar (roomId: string): Promise<FileBox> {
     log.verbose('PuppetWechat4u', 'roomAvatar(%s)', roomId)
 
     const payload = await this.roomPayload(roomId)
@@ -917,7 +905,7 @@ export class PuppetWechat4u extends Puppet {
     return qrCodeForChatie()
   }
 
-  public async roomAdd (
+  override async roomAdd (
     roomId    : string,
     contactId : string,
   ): Promise<void> {
@@ -936,10 +924,10 @@ export class PuppetWechat4u extends Puppet {
     log.verbose('PuppetWechat4u', 'roomAdd(%s, %s) ret: %s', roomId, contactId, JSON.stringify(ret))
   }
 
-  public async roomTopic (roomId: string)                : Promise<string>
-  public async roomTopic (roomId: string, topic: string) : Promise<void>
+  override async roomTopic (roomId: string)                : Promise<string>
+  override async roomTopic (roomId: string, topic: string) : Promise<void>
 
-  public async roomTopic (
+  override async roomTopic (
     roomId: string,
     topic?: string,
   ): Promise<void | string> {
@@ -954,7 +942,7 @@ export class PuppetWechat4u extends Puppet {
     await this.wechat4u.updateChatRoomName(roomId, topic)
   }
 
-  public async roomCreate (
+  override async roomCreate (
     contactIdList : string[],
     topic         : string,
   ): Promise<string> {
@@ -966,22 +954,22 @@ export class PuppetWechat4u extends Puppet {
     return roomId
   }
 
-  public async roomAnnounce (roomId: string)                : Promise<string>
-  public async roomAnnounce (roomId: string, text: string)  : Promise<void>
+  override async roomAnnounce (roomId: string)                : Promise<string>
+  override async roomAnnounce (roomId: string, text: string)  : Promise<void>
 
-  public async roomAnnounce (roomId: string, text?: string) : Promise<void | string> {
+  override async roomAnnounce (roomId: string, text?: string) : Promise<void | string> {
     return throwUnsupportedError(roomId, text)
   }
 
-  public async roomQuit (roomId: string): Promise<void> {
+  override async roomQuit (roomId: string): Promise<void> {
     return throwUnsupportedError(roomId)
   }
 
-  public async roomQRCode (roomId: string): Promise<string> {
+  override async roomQRCode (roomId: string): Promise<string> {
     return throwUnsupportedError(roomId)
   }
 
-  public async roomMemberList (roomId: string) : Promise<string[]> {
+  override async roomMemberList (roomId: string) : Promise<string[]> {
     log.verbose('PuppetWechat4u', 'roommemberList(%s)', roomId)
     const rawPayload = await this.roomRawPayload(roomId)
 
@@ -991,7 +979,7 @@ export class PuppetWechat4u extends Puppet {
     return memberIdList
   }
 
-  public async roomMemberRawPayload (roomId: string, contactId: string): Promise<WebRoomRawMember>  {
+  override async roomMemberRawPayload (roomId: string, contactId: string): Promise<WebRoomRawMember>  {
     log.verbose('PuppetWechat4u', 'roomMemberRawPayload(%s, %s)', roomId, contactId)
     const rawPayload = await this.roomRawPayload(roomId)
 
@@ -1005,7 +993,7 @@ export class PuppetWechat4u extends Puppet {
     }
   }
 
-  public async roomMemberRawPayloadParser (rawPayload: WebRoomRawMember): Promise<RoomMemberPayload>  {
+  override async roomMemberRawPayloadParser (rawPayload: WebRoomRawMember): Promise<RoomMemberPayload>  {
     log.verbose('PuppetWechat4u', 'roomMemberRawPayloadParser(%s)', rawPayload)
 
     const payload: RoomMemberPayload = {
@@ -1022,21 +1010,21 @@ export class PuppetWechat4u extends Puppet {
    * Friendship
    *
    */
-  public async friendshipSearchPhone (
+  override async friendshipSearchPhone (
     phone: string,
   ): Promise<null | string> {
     log.verbose('PuppetWechat4u', 'friendshipSearchPhone(%s)', phone)
     return throwUnsupportedError()
   }
 
-  public async friendshipSearchWeixin (
+  override async friendshipSearchWeixin (
     weixin: string,
   ): Promise<null | string> {
     log.verbose('PuppetWechat4u', 'friendshipSearchWeixin(%s)', weixin)
     return throwUnsupportedError()
   }
 
-  public async friendshipAdd (
+  override async friendshipAdd (
     contactId : string,
     hello     : string,
   ): Promise<void> {
@@ -1045,7 +1033,7 @@ export class PuppetWechat4u extends Puppet {
     await this.wechat4u.addFriend(contactId, hello)
   }
 
-  public async friendshipAccept (
+  override async friendshipAccept (
     friendshipId : string,
   ): Promise<void> {
     log.verbose('PuppetWechat4u', 'friendshipAccept(%s)', friendshipId)
@@ -1054,7 +1042,7 @@ export class PuppetWechat4u extends Puppet {
     await this.wechat4u.verifyUser(payload.contactId, payload.ticket)
   }
 
-  public async friendshipRawPayload (id: string): Promise<any> {
+  override async friendshipRawPayload (id: string): Promise<any> {
     log.verbose('PuppetWechat4u', 'friendshipRawPayload(%s)', id)
 
     const rawPayload = this.cacheMessageRawPayload.get(id)
@@ -1065,7 +1053,7 @@ export class PuppetWechat4u extends Puppet {
     return rawPayload
   }
 
-  public async friendshipRawPayloadParser (rawPayload: any) : Promise<FriendshipPayload> {
+  override async friendshipRawPayloadParser (rawPayload: any) : Promise<FriendshipPayload> {
     log.verbose('PuppetWechat4u', 'friendshipRawPayloadParser(%s)', rawPayload)
 
     const timestamp = Math.floor(Date.now() / 1000) // in seconds
@@ -1110,50 +1098,50 @@ export class PuppetWechat4u extends Puppet {
    * Tag
    *
    */
-  public async tagContactAdd (
+  override async tagContactAdd (
     tagId: string,
     contactId: string,
   ): Promise<void> {
     log.verbose('PuppetWechat4u', 'tagContactAdd(%s)', tagId, contactId)
   }
 
-  public async tagContactRemove (
+  override async tagContactRemove (
     tagId: string,
     contactId: string,
   ): Promise<void> {
     log.verbose('PuppetWechat4u', 'tagContactRemove(%s)', tagId, contactId)
   }
 
-  public async tagContactDelete (
+  override async tagContactDelete (
     tagId: string,
   ): Promise<void> {
     log.verbose('PuppetWechat4u', 'tagContactDelete(%s)', tagId)
   }
 
-  public async tagContactList (
+  override async tagContactList (
     contactId?: string,
   ): Promise<string[]> {
     log.verbose('PuppetWechat4u', 'tagContactList(%s)', contactId)
     return []
   }
 
-  public contactCorporationRemark (..._: any[]) {
+  override contactCorporationRemark (..._: any[]) {
     return throwUnsupportedError()
   }
 
-  public contactDescription (..._: any[]) {
+  override contactDescription (..._: any[]) {
     return throwUnsupportedError()
   }
 
-  public contactPhone (..._: any[]) {
+  override contactPhone (..._: any[]) {
     return throwUnsupportedError()
   }
 
-  async messageLocation (messageId: string): Promise<LocationPayload> {
+  override async messageLocation (messageId: string): Promise<LocationPayload> {
     return throwUnsupportedError(messageId)
   }
 
-  async messageSendLocation (
+  override async messageSendLocation (
     conversationId: string,
     locationPayload: LocationPayload,
   ): Promise<void | string> {
