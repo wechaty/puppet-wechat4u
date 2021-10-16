@@ -140,7 +140,10 @@ export class PuppetWechat4u extends Puppet {
      *  then we will be able to use `MemoryMixin`
      *  to init MemoryCard for the child puppet
      */
-    await this.memory.load()
+    try {
+      await this.memory.load()
+    } catch (_) {}
+
     // console.info('faint 1')
     const syncData = await this.memory.get(MEMORY_SLOT_NAME)
     // console.info('faint 2')
