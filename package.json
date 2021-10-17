@@ -1,6 +1,6 @@
 {
   "name": "wechaty-puppet-wechat4u",
-  "version": "0.20.3",
+  "version": "0.21.0",
   "description": "Wechat4u Puppet for Wechaty",
   "type": "module",
   "exports": {
@@ -57,11 +57,11 @@
     "npm-run-all": "^4.1.5",
     "pkg-jq": "^0.2.11",
     "shx": "^0.3.3",
-    "tstest": "^0.5.16",
-    "wechaty": "^0.75.21"
+    "tstest": "^0.7.3",
+    "wechaty": "^0.77"
   },
   "peerDependencies": {
-    "wechaty-puppet": ">=0.40"
+    "wechaty-puppet": "^0.51"
   },
   "homepage": "https://github.com/wechaty/wechaty-puppet-wechat4u#readme",
   "dependencies": {

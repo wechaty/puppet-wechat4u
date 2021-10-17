@@ -49,6 +49,7 @@ import {
 
   log,
   LocationPayload,
+  GError,
 }                         from 'wechaty-puppet'
 
 import {
@@ -123,20 +124,15 @@ export class PuppetWechat4u extends Puppet {
     this.cacheMessageRawPayload = new QuickLru<string, WebMessageRawPayload>(lruOptions)
   }
 
-  async tryStart () { throw new Error('not implement') }
-  async tryStop () { throw new Error('not implement') }
-
-  override async start (): Promise<void> {
-    log.verbose('PuppetWechat4u', 'start() with %s', this.memory.name || 'NONAME')
-
-    this.state.on('pending')
+  override async onStart (): Promise<void> {
+    log.verbose('PuppetWechat4u', 'onStart() with %s', this.memory.name || 'NONAME')
 
     if (this.wechat4u) {
-      log.warn('PuppetWechat4u', 'start() wechat4u exist, will be overwrited')
+      log.warn('PuppetWechat4u', 'onStart() wechat4u exist, will be overwrited')
     }
 
     /**
-     * Huan(202110): rename `start()` to `tryStart()`
+     * Huan(202110): rename `onStart()` to `tryStart()`
      *  then we will be able to use `MemoryMixin`
      *  to init MemoryCard for the child puppet
      */
@@ -159,7 +155,7 @@ export class PuppetWechat4u extends Puppet {
     this.initHookEvents(this.wechat4u)
 
     /**
-     * Should not `await` start/restart for wechat4u
+     * Should not `await` onStart/restart for wechat4u
      * because it will blocks...
      */
     if (this.wechat4u.PROP.uin) {
@@ -168,10 +164,6 @@ export class PuppetWechat4u extends Puppet {
     } else {
       this.wechat4u.start()
     }
-
-    // await some tasks...
-    this.state.on(true)
-
   }
 
   private monkeyPatch (wechat4u: any) {
@@ -285,7 +277,11 @@ export class PuppetWechat4u extends Puppet {
       // FIXME: where's the logined user id?
       const userId = this.wechat4u.user.UserName
       if (!userId) {
-        this.emit('error', { ...new Error('login event can not found selfId') })
+        this.emit('error', {
+          data: JSON.stringify(GError.from(
+            new Error('login event can not found selfId'),
+          )),
+        })
         return
       }
       await this.login(userId)
@@ -317,7 +313,9 @@ export class PuppetWechat4u extends Puppet {
      * 错误事件，参数一般为Error对象
      */
     wechat4u.on('error', (err: Error) => {
-      this.emit('error', { ...err })
+      this.emit('error', {
+        data: JSON.stringify(GError.from(err)),
+      })
     })
 
     /**
@@ -363,21 +361,11 @@ export class PuppetWechat4u extends Puppet {
     })
   }
 
-  override async stop (): Promise<void> {
-    log.verbose('PuppetWechat4u', 'stop()')
-
-    if (this.state.off()) {
-      log.warn('PuppetWechat4u', 'quit() is called on a OFF puppet. await ready(off) and return.')
-      await this.state.ready('off')
-      return
-    }
-
-    this.state.off('pending')
+  override async onStop (): Promise<void> {
+    log.verbose('PuppetWechat4u', 'onStop()')
 
     this.wechat4u.stop()
     this.wechat4u = undefined
-
-    this.state.off(true)
   }
 
   override async ding (data: string): Promise<void> {
