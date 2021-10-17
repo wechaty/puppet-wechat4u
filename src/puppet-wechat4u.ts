@@ -56,6 +56,7 @@ import {
   qrCodeForChatie,
   retry,
   VERSION,
+  NAME,
 }                       from './config.js'
 
 import {
@@ -123,6 +124,9 @@ export class PuppetWechat4u extends Puppet {
 
     this.cacheMessageRawPayload = new QuickLru<string, WebMessageRawPayload>(lruOptions)
   }
+
+  override version  () { return `${VERSION}<${super.version()}>` }
+  override name     () { return `${NAME}<${super.name()}>` }
 
   override async onStart (): Promise<void> {
     log.verbose('PuppetWechat4u', 'onStart() with %s', this.memory.name || 'NONAME')

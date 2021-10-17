@@ -13,6 +13,7 @@ import promiseRetry from 'promise-retry'
 import { packageJson } from './package-json.js'
 
 const VERSION = packageJson.version || '0.0.0'
+const NAME    = packageJson.name    || 'NONAME'
 
 export function qrCodeForChatie (): FileBox {
   const CHATIE_OFFICIAL_ACCOUNT_QRCODE = 'http://weixin.qq.com/r/qymXj7DEO_1ErfTs93y5'
@@ -47,11 +48,8 @@ export async function retry<T> (
   return promiseRetry(retryOptions, retryableFn)
 }
 
-/**
- * VERSION
- */
-export { VERSION }
-
 export {
+  VERSION,
+  NAME,
   log,
 }
