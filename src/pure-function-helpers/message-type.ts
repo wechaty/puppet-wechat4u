@@ -1,6 +1,4 @@
-import {
-  MessageType,
-}                     from 'wechaty-puppet'
+import * as PUPPET from 'wechaty-puppet'
 
 import {
   WebMessageRawPayload,
@@ -9,21 +7,21 @@ import {
 
 export function messageType (
   rawPayload: WebMessageRawPayload,
-): MessageType {
+): PUPPET.type.Message {
   switch (rawPayload.MsgType) {
     case WebMessageType.TEXT:
-      return MessageType.Text
+      return PUPPET.type.Message.Text
 
     case WebMessageType.EMOTICON:
     case WebMessageType.IMAGE:
-      return MessageType.Image
+      return PUPPET.type.Message.Image
 
     case WebMessageType.VOICE:
-      return MessageType.Audio
+      return PUPPET.type.Message.Audio
 
     case WebMessageType.MICROVIDEO:
     case WebMessageType.VIDEO:
-      return MessageType.Video
+      return PUPPET.type.Message.Video
 
     /**
      * Treat those Types as TEXT
@@ -33,7 +31,7 @@ export function messageType (
      */
     case WebMessageType.SYS:
     case WebMessageType.APP:
-      return MessageType.Text
+      return PUPPET.type.Message.Text
 
     // VERIFYMSG           = 37,
     // POSSIBLEFRIEND_MSG  = 40,
@@ -46,6 +44,6 @@ export function messageType (
     // SYSNOTICE           = 9999,
     // RECALLED            = 10002,
     default:
-      return MessageType.Text
+      return PUPPET.type.Message.Text
   }
 }

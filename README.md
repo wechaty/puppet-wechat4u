@@ -27,7 +27,9 @@ Learn more about the Puppet at [Wechaty wiki: Puppet](https://github.com/Chatie/
 
 ## HISTORY
 
-### master
+### master v1.0 (Oct 30, 2021)
+
+Release 1.0 of Wechaty Puppet for Wechat4u
 
 ### v0.20 (Sep 14, 2021)
 

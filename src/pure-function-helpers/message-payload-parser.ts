@@ -1,6 +1,4 @@
-import type {
-  MessagePayload,
-}                           from 'wechaty-puppet'
+import type * as PUPPET from 'wechaty-puppet'
 
 import type {
   WebMessageRawPayload,
@@ -19,7 +17,7 @@ import {
 
 export function messageRawPayloadParser (
   rawPayload: WebMessageRawPayload,
-): MessagePayload {
+): PUPPET.payload.Message {
 
   /**
    * 0. Set Message Type
@@ -72,7 +70,7 @@ export function messageRawPayloadParser (
 
   } else {
     const parts = rawPayload.Content.split(':\n')
-    if (parts && parts.length > 1) {
+    if (parts.length > 1) {
       if (isContactId(parts[0]!)) {
 
         fromId = parts[0]
@@ -92,7 +90,7 @@ export function messageRawPayloadParser (
   if (isRoomId(rawPayload.FromUserName)) {
 
     const parts = rawPayload.Content.split(':\n')
-    if (parts && parts.length > 1) {
+    if (parts.length > 1) {
 
       text = parts[1]
 
@@ -121,7 +119,7 @@ export function messageRawPayloadParser (
     throw Error('empty roomId and empty toId!')
   }
 
-  let payload: MessagePayload
+  let payload: PUPPET.payload.Message
 
   // Two branch is the same code.
   // Only for making TypeScript happy

@@ -16,17 +16,12 @@
  *   limitations under the License.
  *
  */
-import type {
-  EventLogoutPayload,
-  EventLoginPayload,
-  EventScanPayload,
-  EventErrorPayload,
-  EventMessagePayload,
-}                         from 'wechaty-puppet'
-
+import * as PUPPET   from 'wechaty-puppet'
 import {
-  PuppetWechat4u,
-}                   from '../src/mod.js'
+  FileBox,
+}                       from 'file-box'
+
+import { PuppetWechat4u } from '../src/mod.js'
 
 /**
  *
@@ -54,7 +49,7 @@ puppet
  */
 puppet.start()
   .catch(async e => {
-    console.error('Bot start() fail:', e)
+    console.error('Bot start() fail:', e as Error)
     await puppet.stop()
     process.exit(-1)
   })
@@ -71,32 +66,35 @@ puppet.start()
  *  `scan`, `login`, `logout`, `error`, and `message`
  *
  */
-function onScan (payload: EventScanPayload) {
+function onScan (payload: PUPPET.payload.EventScan) {
   if (payload.qrcode) {
+    // Generate a QR Code online via
+    // http://goqr.me/api/doc/create-qr-code/
     const qrcodeImageUrl = [
       'https://wechaty.js.org/qrcode/',
       encodeURIComponent(payload.qrcode),
     ].join('')
+
     console.info(`[${payload.status}] ${qrcodeImageUrl}\nScan QR Code above to log in: `)
   } else {
     console.info(`[${payload.status}]`)
   }
 }
 
-function onLogin (payload: EventLoginPayload) {
+function onLogin (payload: PUPPET.payload.EventLogin) {
   console.info(`${payload.contactId} login`)
   puppet.messageSendText(payload.contactId, 'Wechaty login').catch(console.error)
 }
 
-function onLogout (payload: EventLogoutPayload) {
+function onLogout (payload: PUPPET.payload.EventLogout) {
   console.info(`${payload.contactId} logouted`)
 }
 
-function onError (payload: EventErrorPayload) {
+function onError (payload: PUPPET.payload.EventError) {
   console.error('Bot error:', payload.data)
   /*
   if (bot.logonoff()) {
-    bot.say('Wechaty error: ' + e.message).catch(console.error)
+    bot.say('Wechaty error: ' + (e as Error).message).catch(console.error)
   }
   */
 }
@@ -107,11 +105,22 @@ function onError (payload: EventErrorPayload) {
  *    dealing with Messages.
  *
  */
-async function onMessage (payload: EventMessagePayload) {
-  const msgPayload = await puppet.messagePayload(payload.messageId)
-  console.info(JSON.stringify(msgPayload))
-  if (msgPayload.text === 'ding') {
-    await puppet.messageSendText(msgPayload.fromId!, 'dong')
+async function onMessage (payload: PUPPET.payload.EventMessage) {
+  const messagePayload = await puppet.messagePayload(payload.messageId)
+  console.info(JSON.stringify(messagePayload))
+
+  if (messagePayload.type === PUPPET.type.Message.Text
+    && /^ding$/i.test(messagePayload.text || '')
+  ) {
+    const conversationId = messagePayload.roomId || messagePayload.fromId
+
+    if (!conversationId) {
+      throw new Error('no conversation id')
+    }
+    await puppet.messageSendText(conversationId, 'dong')
+
+    const fileBox = FileBox.fromUrl('https://wechaty.github.io/wechaty/images/bot-qr-code.png')
+    await puppet.messageSendFile(conversationId, fileBox)
   }
 }
 

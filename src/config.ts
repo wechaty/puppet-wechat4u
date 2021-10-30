@@ -3,9 +3,11 @@
 /// <reference path="./types.d.ts" />
 
 import {
-  FileBox,
   log,
 }             from 'wechaty-puppet'
+import {
+  FileBox,
+}             from 'file-box'
 
 import type { OperationOptions } from 'retry'
 import promiseRetry from 'promise-retry'
