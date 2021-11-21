@@ -17,7 +17,7 @@ import {
 
 export function messageRawPayloadParser (
   rawPayload: WebMessageRawPayload,
-): PUPPET.payload.Message {
+): PUPPET.payloads.Message {
 
   /**
    * 0. Set Message Type
@@ -119,7 +119,7 @@ export function messageRawPayloadParser (
     throw Error('empty roomId and empty toId!')
   }
 
-  let payload: PUPPET.payload.Message
+  let payload: PUPPET.payloads.Message
 
   // Two branch is the same code.
   // Only for making TypeScript happy

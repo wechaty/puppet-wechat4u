@@ -7,21 +7,21 @@ import {
 
 export function messageType (
   rawPayload: WebMessageRawPayload,
-): PUPPET.type.Message {
+): PUPPET.types.Message {
   switch (rawPayload.MsgType) {
     case WebMessageType.TEXT:
-      return PUPPET.type.Message.Text
+      return PUPPET.types.Message.Text
 
     case WebMessageType.EMOTICON:
     case WebMessageType.IMAGE:
-      return PUPPET.type.Message.Image
+      return PUPPET.types.Message.Image
 
     case WebMessageType.VOICE:
-      return PUPPET.type.Message.Audio
+      return PUPPET.types.Message.Audio
 
     case WebMessageType.MICROVIDEO:
     case WebMessageType.VIDEO:
-      return PUPPET.type.Message.Video
+      return PUPPET.types.Message.Video
 
     /**
      * Treat those Types as TEXT
@@ -31,7 +31,7 @@ export function messageType (
      */
     case WebMessageType.SYS:
     case WebMessageType.APP:
-      return PUPPET.type.Message.Text
+      return PUPPET.types.Message.Text
 
     // VERIFYMSG           = 37,
     // POSSIBLEFRIEND_MSG  = 40,
@@ -44,6 +44,6 @@ export function messageType (
     // SYSNOTICE           = 9999,
     // RECALLED            = 10002,
     default:
-      return PUPPET.type.Message.Text
+      return PUPPET.types.Message.Text
   }
 }
