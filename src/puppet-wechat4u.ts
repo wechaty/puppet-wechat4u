@@ -268,7 +268,7 @@ export class PuppetWechat4u extends PUPPET.Puppet {
      * 登出成功事件
      */
     wechat4u.on('logout', async () => {
-      if (this.logonoff()) {
+      if (this.isLoggedIn) {
         await this.logout()
       }
       // 清除数据
