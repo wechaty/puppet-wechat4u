@@ -23,6 +23,7 @@ import * as PUPPET from 'wechaty-puppet'
 import { log } from 'wechaty-puppet'
 import type { FileBoxInterface } from 'file-box'
 import { FileBox } from 'file-box'
+import { GError } from 'gerror'
 
 import {
   qrCodeForChatie,
@@ -253,9 +254,9 @@ export class PuppetWechat4u extends PUPPET.Puppet {
       const userId = this.wechat4u.user.UserName
       if (!userId) {
         this.emit('error', {
-          data: JSON.stringify(PUPPET.helper.GError.from(
+          data: GError.stringify(
             new Error('login event can not found selfId'),
-          )),
+          ),
         })
         return
       }
@@ -289,7 +290,7 @@ export class PuppetWechat4u extends PUPPET.Puppet {
      */
     wechat4u.on('error', (err: Error) => {
       this.emit('error', {
-        data: JSON.stringify(PUPPET.helper.GError.from(err)),
+        data: GError.stringify(err),
       })
     })
 
