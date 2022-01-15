@@ -163,6 +163,7 @@ export interface WebMessageRawPayload {
   FromUserName:     string,
   MMActualContent:  string, // Content has @id prefix added by wx
   Content:          string,
+  OriginalContent:  string,
 
   MMDigest:         string,
   MMDisplayTime:    number,  // Javascript timestamp of milliseconds

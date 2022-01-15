@@ -69,7 +69,7 @@ export function messageRawPayloadParser (
     fromId = rawPayload.FromUserName
 
   } else {
-    const parts = rawPayload.Content.split(':\n')
+    const parts = rawPayload.OriginalContent.split(':<br/>')
     if (parts.length > 1) {
       if (isContactId(parts[0]!)) {
 
@@ -91,14 +91,9 @@ export function messageRawPayloadParser (
 
     const parts = rawPayload.Content.split(':\n')
     if (parts.length > 1) {
-
-      text = parts[1]
-
-    } else {
-
-      text = rawPayload.Content
-
+      parts.shift()
     }
+    text = parts.join(':\n')
 
   } else {
 
