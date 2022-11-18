@@ -1,5 +1,6 @@
 export function isRoomId (id: string): boolean {
-  return /^@@/.test(id)
+  if (!id) return false
+  return /^@@|@chatroom$/.test(id) // 以@@开头或者@chatroom结尾
 }
 
 export function isContactId (id: string): boolean {

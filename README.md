@@ -27,6 +27,12 @@ Learn more about the Puppet at [Wechaty wiki: Puppet](https://github.com/Chatie/
 
 ## HISTORY
 
+### v1.13.1 (Nov 18, 2022)
+
+1.Support uos login
+
+2.Refactor the code to support more event
+
 ### master v1.0 (Oct 30, 2021)
 
 Release 1.0 of Wechaty Puppet for Wechat4u
