@@ -85,6 +85,9 @@ export enum WebAppMsgType {
   EMOTION                  = 15,
   CARD_TICKET              = 16,
   REALTIME_SHARE_LOCATION  = 17,
+  // web 协议可以接收到小程序的数据格式，但是无法展示出来，可以用于识别小程序的参数
+  MINIPROGRAM              = 33,
+  MINIPROGRAMAPP           = 36,
   TRANSFERS                = 2e3,
   RED_ENVELOPES            = 2001,
   READER_TYPE              = 100001,
@@ -267,6 +270,7 @@ export interface WebMessageRawPayload {
 
   MMIsChatRoom? : boolean,
 
+  OriginalContent: string
 }
 
 // export type MessageTypeName = 'TEXT' | 'IMAGE' | 'VOICE' | 'VERIFYMSG' | 'POSSIBLEFRIEND_MSG'
@@ -294,5 +298,6 @@ export interface WebRoomRawPayload {
   NickName:         string,
   OwnerUin:         number,
   ChatRoomOwner:    string,
+  HeadImgUrl?:      string,
   MemberList?:      WebRoomRawMember[],
 }
