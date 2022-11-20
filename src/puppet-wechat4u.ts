@@ -136,12 +136,13 @@ export class PuppetWechat4u extends PUPPET.Puppet {
   }
 
   /**
-   * 由于获取用户信息目前是发现一个不存在的就会调用一次，如果是群消息就会发出特别多的信息请求，最后就是大部分接口请求失效
-   * 目前采用定时器的方式去定时获取用户信息
-   * 1、当第一次触发搜索请求的时候会开启一个定时器
-   * 2、所有请求的未知用户id都会存储到unknownContactId中
-   * 3、定时器会在500ms执行一次，每次取unknownContactId中的50条数据
-   * 4、如果unknownContactId的数据为空就会清空定时器，等待下一次建立
+   * At present, if a user information that does not exist is found, it will be called once.
+   * If it is a group message, it will send a lot of information requests, and finally most of the interface requests will fail.
+   * At present, the method of timer is used to regularly obtain user information
+   * 1、A timer is started when the search request is triggered for the first time
+   * 2、All requested unknown user ids will be stored in unknownContactId
+   * 3、The timer will be executed once every 500ms, each time fetching 50 pieces of data in unknownContactId
+   * 4、If the data of unknownContactId is empty, the timer will be cleared and wait for the next establishment
    * @private
    */
 
@@ -252,7 +253,7 @@ export class PuppetWechat4u extends PUPPET.Puppet {
 
   /**
    * @private
-   * For issue #668
+   * For issue https://github.com/wechaty/puppet-wechat/issues/107
    */
   private async waitStable (): Promise<void> {
     log.verbose('PuppetWeChat', 'waitStable()')
