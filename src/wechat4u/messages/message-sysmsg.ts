@@ -38,7 +38,6 @@ export async function parseSysmsgMessagePayload (message: WebMessageRawPayload):
   }
 
   const content = message.Content.trim()
-
   const sysmsgIndex = content.indexOf('<sysmsg')
   if (sysmsgIndex === -1) {
     return {

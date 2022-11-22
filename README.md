@@ -27,6 +27,10 @@ Learn more about the Puppet at [Wechaty wiki: Puppet](https://github.com/Chatie/
 
 ## HISTORY
 
+### v1.13.8 (Nov 22, 2022)
+
+1.Fix Contact update
+
 ### v1.13.1 (Nov 18, 2022)
 
 1.Support uos login
