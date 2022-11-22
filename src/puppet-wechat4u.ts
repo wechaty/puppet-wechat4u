@@ -51,6 +51,7 @@ import { parseEmotionMessagePayload } from './wechat4u/messages/message-emotion.
 
 import { wechat4uContactToWechaty } from './wechat4u/schema-mapper/contact.js'
 import { wechat4uRoomMemberToWechaty, wechat4uRoomToWechaty } from './wechat4u/schema-mapper/room.js'
+import { isRoomId } from './wechat4u/utils/is-type.js'
 
 const MEMORY_SLOT_NAME = 'PUPPET-WECHAT4U'
 
@@ -69,7 +70,7 @@ export class PuppetWechat4u extends PUPPET.Puppet {
 
   private scanQrCode?: string
 
-  private unknownContactId: string[] = []
+  private unknownContactId: string[][] = []
   private getContactInterval: undefined | NodeJS.Timeout
 
   private readonly cacheMessageRawPayload: QuickLru<string, WebMessageRawPayload>
@@ -147,19 +148,30 @@ export class PuppetWechat4u extends PUPPET.Puppet {
    */
 
   private getContactsInfo () {
-    const tempArray: string[] = this.unknownContactId.splice(0, 50)
+    const tempArray: string[][] = this.unknownContactId.splice(0, 50)
     if (tempArray.length === 0 && this.getContactInterval) {
       clearInterval(this.getContactInterval)
       this.getContactInterval = undefined
     }
     if (tempArray.length) {
-      const userDataList = tempArray.map(contactId => {
+      const userDataList = tempArray.map(contact => {
         return {
-          EncryChatRoomId : '',
-          UserName        : contactId,
+          EncryChatRoomId : contact[1],
+          UserName        : contact[0],
         }
       })
-      this.wechat4u.batchGetContact(userDataList).then((result: any) => {
+      this.wechat4u.batchGetContact(userDataList).then((result: any[]) => {
+        result.forEach((item) => {
+          if (isRoomId(item.UserName)) {
+            const membersList = item.MemberList.map((mItem: any) => {
+              return {
+                ...mItem,
+                EncryChatRoomId: item.UserName,
+              }
+            })
+            this.wechat4u.updateContacts(membersList)
+          }
+        })
         this.wechat4u.updateContacts(result)
         return null
       }).catch((e: any) => {
@@ -360,6 +372,24 @@ export class PuppetWechat4u extends PUPPET.Puppet {
         contacts.length,
         Object.keys(wechat4u.contacts).length,
       )
+      contacts.forEach((item: any) => {
+        if (isRoomId(item.UserName)) {
+          const membersList = item.MemberList.map((mItem: any) => {
+            this.unknownContactId.push([mItem.UserName, item.UserName])
+            return {
+              ...mItem,
+              EncryChatRoomId: item.UserName,
+            }
+          })
+          this.wechat4u.updateContacts(membersList)
+        }
+      })
+      if (!this.getContactInterval) {
+        this.getContactsInfo()
+        this.getContactInterval = setInterval(() => {
+          this.getContactsInfo()
+        }, 800)
+      }
     })
     /**
      * 错误事件，参数一般为Error对象
@@ -379,7 +409,6 @@ export class PuppetWechat4u extends PUPPET.Puppet {
         log.warn('PuppetWechat4u', 'initHookEvents() wechat4u.on(message) no message id: %s', JSON.stringify(msg))
         throw new Error('no id')
       }
-
       this.cacheMessageRawPayload.set(msg.MsgId, msg)
       const event = await parseEvent(this, msg)
       switch (event.type) {
@@ -497,14 +526,17 @@ export class PuppetWechat4u extends PUPPET.Puppet {
 
     const name = payload.name
     // add '&type=big' to get big image
-    const res = await this.wechat4u.getHeadImg(rawPayload.HeadImgUrl + '&type=big')
-    /**
-     * 如何获取联系人头像
-     */
-    return FileBox.fromBuffer(
-      res.data,
-      `wechaty-contact-avatar-${name}.jpg`, // FIXME
-    )
+    if (rawPayload.HeadImgUrl) {
+      const res = await this.wechat4u.getHeadImg(rawPayload.HeadImgUrl + '&type=big')
+      /**
+       * 如何获取联系人头像
+       */
+      return FileBox.fromBuffer(
+        res.data,
+        `wechaty-contact-avatar-${name}.jpg`, // FIXME
+      )
+    }
+
   }
 
   override async contactRawPayload (contactId: string): Promise<WebContactRawPayload> {
@@ -514,7 +546,7 @@ export class PuppetWechat4u extends PUPPET.Puppet {
     )
 
     if (!(contactId in this.wechat4u.contacts)) {
-      this.unknownContactId.push(contactId)
+      this.unknownContactId.push([contactId, ''])
       if (!this.getContactInterval) {
         this.getContactsInfo()
         this.getContactInterval = setInterval(() => {

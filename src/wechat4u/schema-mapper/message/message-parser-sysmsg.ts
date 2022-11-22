@@ -17,7 +17,6 @@ export const sysmsgParser: MessageParser = async (webMessageRawPayload: WebMessa
   if (!sysmsgPayload) {
     return ret
   }
-
   switch (sysmsgPayload.type) {
     case 'pat': {
       const patMessagePayload: PatMessagePayload = sysmsgPayload.payload as PatMessagePayload
