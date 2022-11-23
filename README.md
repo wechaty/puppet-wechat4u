@@ -53,6 +53,10 @@ Fix `wechaty-puppet` dependencies
 
 Init version
 
+## MAINTAINERS
+
+- [Leo Chen](https://wechaty.js.org/contributors/leochen-g/), [project admin](https://github.com/wechaty/puppet-wechat4u/pull/42#issuecomment-1324436596)
+
 ## AUTHOR
 
 [Huan LI](http://linkedin.com/in/zixia) \<zixia@zixia.net\>
