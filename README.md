@@ -55,7 +55,7 @@ Init version
 
 ## MAINTAINERS
 
-- [Leo Chen](https://wechaty.js.org/contributors/leochen-g/), [project admin](https://github.com/wechaty/puppet-wechat4u/pull/42#issuecomment-1324436596)
+- [Leo Chen](https://wechaty.js.org/contributors/leochen-g/), [Project Admin](https://github.com/wechaty/puppet-wechat4u/pull/42#issuecomment-1324436596)
 - [Huan](https://wechaty.js.org/contributors/huan/), Author of Puppet WeChat4U
 
 ## AUTHOR
@@ -69,6 +69,6 @@ Init version
 
 ## COPYRIGHT & LICENSE
 
-* Code & Docs © 2018 Huan LI \<zixia@zixia.net\>
-* Code released under the Apache-2.0 License
-* Docs released under Creative Commons
+- Code & Docs © 2018 Huan LI \<zixia@zixia.net\>
+- Code released under the Apache-2.0 License
+- Docs released under Creative Commons
