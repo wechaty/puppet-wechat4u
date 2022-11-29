@@ -6,7 +6,7 @@
 [![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-blue.svg)](https://www.typescriptlang.org/)
 [![ES Modules](https://img.shields.io/badge/ES-Modules-brightgreen)](https://github.com/Chatie/tsconfig/issues/16)
 
-![wechaty puppet wechat4u](https://wechaty.github.io/wechaty-puppet-wechat4u/images/wechat4u-logo.png)
+![wechaty puppet wechat4u](https://wechaty.github.io/puppet-wechat4u/images/wechat4u-logo.png)
 
 Wechat4u Puppet for Wechaty
 
