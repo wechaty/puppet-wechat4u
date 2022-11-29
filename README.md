@@ -56,6 +56,7 @@ Init version
 ## MAINTAINERS
 
 - [Leo Chen](https://wechaty.js.org/contributors/leochen-g/), [project admin](https://github.com/wechaty/puppet-wechat4u/pull/42#issuecomment-1324436596)
+- [Huan](https://wechaty.js.org/contributors/huan/), Author of Puppet WeChat4U
 
 ## AUTHOR
 
