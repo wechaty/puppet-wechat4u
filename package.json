@@ -64,7 +64,7 @@
     "@alloc/quick-lru": "^5.2.0",
     "fast-xml-parser": "^3.21.1",
     "promise-retry": "^2.0.1",
-    "wechat4u": "^0.7.8",
+    "wechat4u": "^0.7.9",
     "xml2js": "^0.4.23"
   },
   "publishConfig": {
