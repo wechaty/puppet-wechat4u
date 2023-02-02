@@ -47,7 +47,7 @@ export function isRoomLeaveDebouncing (roomId: string, removeeId: string): boole
 
 export default async (puppet: PUPPET.Puppet, message: WebMessageRawPayload): Promise<EventPayload> => {
   const roomId = message.FromUserName
-  if (!isRoomId(roomId) || ![WebMessageType.SYS].includes(message.MsgType)) {
+  if (!isRoomId(roomId) || ![ WebMessageType.SYS ].includes(message.MsgType)) {
     return null
   }
 
@@ -65,7 +65,7 @@ export default async (puppet: PUPPET.Puppet, message: WebMessageRawPayload): Pro
       const removerId = (await puppet.roomMemberSearch(roomId, removerName))[0]!
 
       return {
-        removeeIdList: [removerId],
+        removeeIdList: [ removerId ],
         removerId: puppet.currentUserId,
         roomId,
         timestamp: message.CreateTime,
@@ -88,7 +88,7 @@ export default async (puppet: PUPPET.Puppet, message: WebMessageRawPayload): Pro
       const removerId = (await puppet.roomMemberSearch(roomId, removerName))[0]!
 
       return {
-        removeeIdList: [puppet.currentUserId],
+        removeeIdList: [ puppet.currentUserId ],
         removerId,
         roomId,
         timestamp: message.CreateTime,
@@ -98,7 +98,7 @@ export default async (puppet: PUPPET.Puppet, message: WebMessageRawPayload): Pro
     return null
   }
 
-  const ret = await executeRunners<PUPPET.payloads.EventRoomLeave>([youRemoveOther, otherRemoveYou])
+  const ret = await executeRunners<PUPPET.payloads.EventRoomLeave>([ youRemoveOther, otherRemoveYou ])
   if (ret) {
     ret.removeeIdList.forEach((leaverId) => {
       roomLeaveAddDebounce(roomId, leaverId)

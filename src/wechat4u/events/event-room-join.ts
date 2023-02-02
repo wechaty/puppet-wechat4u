@@ -40,7 +40,7 @@ export default async (puppet: PUPPET.Puppet, message: WebMessageRawPayload): Pro
 
   const timestamp = message.CreateTime
 
-  if (![WebMessageType.SYS].includes(message.MsgType)) {
+  if (![ WebMessageType.SYS ].includes(message.MsgType)) {
     return null
   }
 
@@ -52,14 +52,14 @@ export default async (puppet: PUPPET.Puppet, message: WebMessageRawPayload): Pro
    */
   const youInviteOther = async () => {
     let matches: null | string[] = null;
-    [...YOU_INVITE_OTHER_REGEX_LIST, ...OTHER_JOIN_VIA_YOUR_QRCODE_REGEX_LIST].some((re) => !!(matches = message.Content.match(re)))
+    [ ...YOU_INVITE_OTHER_REGEX_LIST, ...OTHER_JOIN_VIA_YOUR_QRCODE_REGEX_LIST ].some((re) => !!(matches = message.Content.match(re)))
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (matches) {
       const inviteName = matches[1]!
       const inviteeId = (await puppet.roomMemberSearch(roomId, inviteName))[0]!
 
       return {
-        inviteeIdList: [inviteeId],
+        inviteeIdList: [ inviteeId ],
         inviterId: puppet.currentUserId,
         roomId,
         timestamp,
@@ -81,7 +81,7 @@ export default async (puppet: PUPPET.Puppet, message: WebMessageRawPayload): Pro
       const inviterId = (await puppet.roomMemberSearch(roomId, inviteName))[0]!
 
       return {
-        inviteeIdList: [puppet.currentUserId],
+        inviteeIdList: [ puppet.currentUserId ],
         inviterId,
         roomId,
         timestamp,
@@ -97,7 +97,7 @@ export default async (puppet: PUPPET.Puppet, message: WebMessageRawPayload): Pro
    */
   const otherInviteOther = async () => {
     let matches: null | string[] = null;
-    [...OTHER_INVITE_YOU_AND_OTHER_REGEX_LIST, ...OTHER_INVITE_OTHER_REGEX_LIST].some((re) => !!(matches = message.Content.match(re)))
+    [ ...OTHER_INVITE_YOU_AND_OTHER_REGEX_LIST, ...OTHER_INVITE_OTHER_REGEX_LIST ].some((re) => !!(matches = message.Content.match(re)))
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (matches) {
       const inviteeIdList = []
@@ -147,7 +147,7 @@ export default async (puppet: PUPPET.Puppet, message: WebMessageRawPayload): Pro
     return null
   }
 
-  const ret = await executeRunners([youInviteOther, otherInviteYou, otherInviteOther, otherJoinViaQrCode])
+  const ret = await executeRunners([ youInviteOther, otherInviteYou, otherInviteOther, otherJoinViaQrCode ])
   if (ret) {
     ret.inviteeIdList.forEach((inviteeId) => {
       removeRoomLeaveDebounce(ret!.roomId, inviteeId)

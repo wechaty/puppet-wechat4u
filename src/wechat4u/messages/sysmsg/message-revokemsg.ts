@@ -38,7 +38,7 @@ export async function parseRevokeMsgMessagePayload (revokeMsgXmlSchema: RevokeMs
     return 'Other'
   })
 
-  const type = (await executeRunners<RevokeMsgType>([youRevoke, otherRevoke]))!
+  const type = (await executeRunners<RevokeMsgType>([ youRevoke, otherRevoke ]))!
 
   return {
     content: revokeMsgXmlSchema.replacemsg,

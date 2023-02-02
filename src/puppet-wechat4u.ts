@@ -331,7 +331,7 @@ export class PuppetWechat4u extends PUPPET.Puppet {
      */
     wechat4u.on('login', async () => {
       // 由于初始好友列表没有存储当前bot的基础信息，所以在登录后直接更新当前机器人的信息
-      this.wechat4u.updateContacts([this.wechat4u.user])
+      this.wechat4u.updateContacts([ this.wechat4u.user ])
       // FIXME: where's the logined user id?
       const userId = this.wechat4u.user.UserName
       if (!userId) {
@@ -375,7 +375,7 @@ export class PuppetWechat4u extends PUPPET.Puppet {
       contacts.forEach((item: any) => {
         if (isRoomId(item.UserName)) {
           const membersList = item.MemberList.map((mItem: any) => {
-            this.unknownContactId.push([mItem.UserName, item.UserName])
+            this.unknownContactId.push([ mItem.UserName, item.UserName ])
             return {
               ...mItem,
               EncryChatRoomId: item.UserName,
@@ -546,7 +546,7 @@ export class PuppetWechat4u extends PUPPET.Puppet {
     )
 
     if (!(contactId in this.wechat4u.contacts)) {
-      this.unknownContactId.push([contactId, ''])
+      this.unknownContactId.push([ contactId, '' ])
       if (!this.getContactInterval) {
         this.getContactsInfo()
         this.getContactInterval = setInterval(() => {
@@ -904,7 +904,7 @@ export class PuppetWechat4u extends PUPPET.Puppet {
 
     const type = 'delmember'
     // XXX: [contactId] or [{ UserName: id }, ...] ?
-    await this.wechat4u.updateChatroom(roomId, [contactId], type)
+    await this.wechat4u.updateChatroom(roomId, [ contactId ], type)
   }
 
   override async roomAvatar (roomId: string): Promise<FileBoxInterface> {
@@ -935,7 +935,7 @@ export class PuppetWechat4u extends PUPPET.Puppet {
     }
 
     // https://github.com/nodeWechat/wechat4u/tree/46931e78bcb56899b8d2a42a37b919e7feaebbef#botupdatechatroomchatroomusername-memberlist-fun
-    const ret = await this.wechat4u.updateChatroom(roomId, [contactId], type)
+    const ret = await this.wechat4u.updateChatroom(roomId, [ contactId ], type)
     log.verbose('PuppetWechat4u', 'roomAdd(%s, %s) ret: %s', roomId, contactId, JSON.stringify(ret))
   }
 

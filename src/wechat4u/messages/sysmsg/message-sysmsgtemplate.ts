@@ -69,7 +69,7 @@ export interface SysmsgTemplateMessagePayload {
  */
 function toList (list: any): any[] {
   if (!Array.isArray(list)) {
-    return [list]
+    return [ list ]
   } else {
     return list
   }
@@ -107,7 +107,7 @@ export async function parseSysmsgTemplateMessagePayload (sysmsgTemplateXml: Sysm
   })
 
   const template = sysmsgTemplateXml.content_template.template
-  const matches = [...template.matchAll(/\$(.+?)\$/g)]
+  const matches = [ ...template.matchAll(/\$(.+?)\$/g) ]
 
   const templateLinkList = matches.map(match => {
     const linkName = match[1]

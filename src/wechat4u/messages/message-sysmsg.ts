@@ -33,7 +33,7 @@ export interface SysmsgMessagePayload {
 }
 
 export async function parseSysmsgMessagePayload (message: WebMessageRawPayload): Promise<SysmsgMessagePayload | null> {
-  if (![WebMessageType.SYS, WebMessageType.RECALLED].includes(message.MsgType)) {
+  if (![ WebMessageType.SYS, WebMessageType.RECALLED ].includes(message.MsgType)) {
     return null
   }
 
