@@ -69,6 +69,9 @@ export class PuppetWechat4u extends PUPPET.Puppet {
   private wechat4u?: any
 
   private scanQrCode?: string
+  // 启动时间 为了处理历史消息
+
+  private startTime: number = 0
 
   private unknownContactId: string[][] = []
   private getContactInterval: undefined | NodeJS.Timeout
@@ -100,7 +103,7 @@ export class PuppetWechat4u extends PUPPET.Puppet {
     if (this.wechat4u) {
       log.warn('PuppetWechat4u', 'onStart() wechat4u exist, will be overwrited')
     }
-
+    this.startTime = parseInt(String(new Date().getTime() / 1000))
     /**
      * Huan(202110): rename `onStart()` to `tryStart()`
      *  then we will be able to use `MemoryMixin`
@@ -148,7 +151,7 @@ export class PuppetWechat4u extends PUPPET.Puppet {
    */
 
   private getContactsInfo () {
-    const tempArray: string[][] = this.unknownContactId.splice(0, 50)
+    const tempArray: string[][] = this.unknownContactId.splice(0, 30)
     if (tempArray.length === 0 && this.getContactInterval) {
       clearInterval(this.getContactInterval)
       this.getContactInterval = undefined
@@ -274,8 +277,8 @@ export class PuppetWechat4u extends PUPPET.Puppet {
     let curNum = 0
     let unchangedNum = 0
 
-    const SLEEP_SECOND = 2
-    const STABLE_CHECK_NUM = 3
+    const SLEEP_SECOND = 4
+    const STABLE_CHECK_NUM = 5
 
     while (unchangedNum < STABLE_CHECK_NUM) {
 
@@ -388,7 +391,7 @@ export class PuppetWechat4u extends PUPPET.Puppet {
         this.getContactsInfo()
         this.getContactInterval = setInterval(() => {
           this.getContactsInfo()
-        }, 800)
+        }, 2000)
       }
     })
     /**
@@ -408,6 +411,11 @@ export class PuppetWechat4u extends PUPPET.Puppet {
       if (!msg.MsgId) {
         log.warn('PuppetWechat4u', 'initHookEvents() wechat4u.on(message) no message id: %s', JSON.stringify(msg))
         throw new Error('no id')
+      }
+      // 如果是消息的创建时间小于机器人启动的时间 直接丢弃
+      if (msg.CreateTime < this.startTime) {
+        log.warn('PuppetWechat4u', 'initHookEvents() wechat4u.on(message) is history message: %s', JSON.stringify(msg))
+        return
       }
       this.cacheMessageRawPayload.set(msg.MsgId, msg)
       const event = await parseEvent(this, msg)
@@ -551,7 +559,7 @@ export class PuppetWechat4u extends PUPPET.Puppet {
         this.getContactsInfo()
         this.getContactInterval = setInterval(() => {
           this.getContactsInfo()
-        }, 800)
+        }, 2000)
       }
     }
 
