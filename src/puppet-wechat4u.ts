@@ -414,7 +414,7 @@ export class PuppetWechat4u extends PUPPET.Puppet {
       }
       // 如果是消息的创建时间小于机器人启动的时间 直接丢弃
       if (msg.CreateTime < this.startTime) {
-        //log.warn('PuppetWechat4u', 'initHookEvents() wechat4u.on(message) is history message: %s', JSON.stringify(msg))
+        // log.warn('PuppetWechat4u', 'initHookEvents() wechat4u.on(message) is history message: %s', JSON.stringify(msg))
         return
       }
       this.cacheMessageRawPayload.set(msg.MsgId, msg)
