@@ -23,6 +23,11 @@ See: [New Puppet - Plan to support `WECHATY_HEAD=WECHAT4U` #69](https://github.c
 
 UOS has support
 
+更新 - 2023/02/10
+目前使用 1.13.14 大多数使用者可能出现微信被官方封禁提醒，从已知收集的封禁情况，暂未有可解决方案。
+
+猜测可能与近期ChatGPT结合本仓库实现个性化机器人导致相关封禁，请合理，谨慎使用本仓库。
+
 If you want to break the above limitations, please consider to use a Wechaty Puppet other than using Web API, like [wechaty-puppet-padchat](https://github.com/lijiarui/wechaty-puppet-padchat).
 
 Learn more about the Puppet at [Wechaty wiki: Puppet](https://github.com/Chatie/wechaty/wiki/Puppet)
