@@ -152,7 +152,7 @@ export class PuppetWechat4u extends PUPPET.Puppet {
    */
 
   private getContactsInfo () {
-    const tempArray: string[][] = this.unknownContactId.splice(0, 30)
+    const tempArray: string[][] = this.unknownContactId.splice(0, 40)
     if (tempArray.length === 0 && this.getContactInterval) {
       clearInterval(this.getContactInterval)
       this.getContactInterval = undefined
