@@ -34,6 +34,12 @@ Learn more about the Puppet at [Wechaty wiki: Puppet](https://github.com/Chatie/
 
 ## HISTORY
 
+### v1.14.0 (April 21, 2023)
+
+1.Stable version
+
+2.Fix Contact isFriend
+
 ### v1.13.8 (Nov 22, 2022)
 
 1.Fix Contact update

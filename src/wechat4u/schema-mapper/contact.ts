@@ -1,5 +1,6 @@
 import * as PUPPET from 'wechaty-puppet'
 import type { WebContactRawPayload } from '../../web-schemas.js'
+import { plainText } from '../utils/xml.js'
 import { log } from 'wechaty-puppet'
 
 export function wechat4uContactToWechaty (rawPayload: WebContactRawPayload): PUPPET.payloads.Contact {
@@ -24,15 +25,13 @@ export function wechat4uContactToWechaty (rawPayload: WebContactRawPayload): PUP
 
   return {
     address:    rawPayload.Alias, // XXX: need a stable address for user
-    alias:      rawPayload.RemarkName,
+    alias:      plainText(rawPayload.RemarkName),
     avatar:     rawPayload.HeadImgUrl,
     city:       rawPayload.City,
-    friend:     rawPayload.stranger === undefined
-      ? undefined
-      : !rawPayload.stranger, // assign by injectio.js
+    friend:     !!(rawPayload.ContactFlag & 1),
     gender:     rawPayload.Sex,
     id:         rawPayload.UserName,
-    name:       rawPayload.NickName || '',
+    name:       plainText(rawPayload.NickName) || '',
     phone:      [],
     province:   rawPayload.Province,
     signature:  rawPayload.Signature,

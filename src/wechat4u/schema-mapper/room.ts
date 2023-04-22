@@ -2,6 +2,7 @@ import type { WebRoomRawPayload, WebRoomRawMember } from '../../web-schemas.js'
 
 import type * as PUPPET from 'wechaty-puppet'
 import { log } from 'wechaty-puppet'
+import { plainText } from '../utils/xml.js'
 
 export function wechat4uRoomToWechaty (rawPayload: WebRoomRawPayload): PUPPET.payloads.Room {
   log.verbose('PuppetWechat4u', 'roomRawPayloadParser(%s)', rawPayload)
@@ -27,7 +28,7 @@ export function wechat4uRoomToWechaty (rawPayload: WebRoomRawPayload): PUPPET.pa
     avatar: rawPayload.HeadImgUrl,
     id,
     memberIdList,
-    topic : rawPayload.NickName || '',
+    topic : plainText(rawPayload.NickName) || '',
     // aliasDict,
   }
   return roomPayload
