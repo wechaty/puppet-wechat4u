@@ -16,7 +16,6 @@
  *   limitations under the License.
  *
  */
-import * as fs from 'fs/promises'
 import Wechat4u from 'wechat4u'
 import QuickLru from '@alloc/quick-lru'
 import * as XMLParser from 'fast-xml-parser'
