@@ -75,6 +75,7 @@ export class PuppetWechat4u extends PUPPET.Puppet {
 
   private unknownContactId: string[][] = []
   private getContactInterval: undefined | NodeJS.Timeout
+  private _heartBeatTimer?: ReturnType<typeof setTimeout>
 
   private readonly cacheMessageRawPayload: QuickLru<string, WebMessageRawPayload>
 
@@ -151,7 +152,7 @@ export class PuppetWechat4u extends PUPPET.Puppet {
    */
 
   private getContactsInfo () {
-    const tempArray: string[][] = this.unknownContactId.splice(0, 30)
+    const tempArray: string[][] = this.unknownContactId.splice(0, 40)
     if (tempArray.length === 0 && this.getContactInterval) {
       clearInterval(this.getContactInterval)
       this.getContactInterval = undefined
@@ -191,40 +192,48 @@ export class PuppetWechat4u extends PUPPET.Puppet {
     this.monkeyPatchOffState(wechat4u, 'login',      Promise.resolve())
     this.monkeyPatchOffState(wechat4u, '_init',      Promise.resolve())
 
-    this.monkeyPatchHook(
-      wechat4u,
-      'syncCheck',
-      () => {
-        log.silly('PuppetWechat4u', 'monkeyPatch() monkeyPatchHook() wechat4u.syncCheck()')
-        this.emit('heartbeat', { data: 'syncCheck()' })
-      },
-    )
+    this._startPuppetHeart(true, wechat4u)
 
     /**
      * Disable Wechat4u for Sending Message to Filehelper when Heartbeat.
      */
     // tslint:disable-next-line
-    // console.log(Object.keys(wechat4u))
+    wechat4u.setPollingTargetGetter(() => {
+      return ''
+    })
 
-    // tslint:disable-next-line:no-string-literal
-    wechat4u['checkPolling'] = () => {
-      log.silly('PuppetWechat4u', 'monkeyPatch() wechat4u.checkPolling()')
-      if (this.state.inactive()) {
-        return
-      }
-      wechat4u.notifyMobile()
-        .catch((err: Error) => {
-          log.warn('PuppetWechat4u', 'monkeyPatch() wechat4u.checkPolling() notifyMobile() exception: %s', err)
-          wechat4u.emit('error', err)
-        })
-      clearTimeout(wechat4u.checkPollingId)
-      wechat4u.checkPollingId = setTimeout(() => wechat4u.checkPolling(), wechat4u._getPollingInterval())
-    }
-
+    wechat4u.setPollingMessageGetter(() => {
+      return ''
+    })
     // 自定义心跳间隔（以毫秒为单位）
     // 25 days: https://stackoverflow.com/a/12633556/1123955
     // this.wechat4u.setPollingIntervalGetter(() => Math.pow(2,31) - 1)
 
+  }
+
+  // 开始监听心跳
+  private _startPuppetHeart (firstTime: boolean = true, wechat4u: any) {
+    if (firstTime && this._heartBeatTimer) {
+      return
+    }
+    let status: string|undefined = wechat4u.state
+
+    if (status === wechat4u.CONF.STATE.login) {
+      status = 'normal'
+    } else if (status === wechat4u.CONF.STATE.logout) {
+      status = 'logout'
+    } else if (status === wechat4u.CONF.STATE.init) {
+      status = 'init'
+    } else if (status === wechat4u.CONF.STATE.uuid) {
+      status = 'uuid'
+    }
+
+    this.emit('heartbeat', { data: `heartbeat@puppet-wechat4u:${status}` })
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    this._heartBeatTimer = setTimeout(async (): Promise<void> => {
+      await this._startPuppetHeart(false, wechat4u)
+      return undefined
+    }, 15 * 1000) // 15s
   }
 
   /**
@@ -249,18 +258,6 @@ export class PuppetWechat4u extends PUPPET.Puppet {
         log.verbose('PuppetWechat4u', 'monkeyPatchOffState(%s) funcNew() state.off() is true, return', func)
         return valueWhenLogouted
       }
-      return funcOrig.call(this)
-    }
-    wechat4u[func] = funcNew
-  }
-
-  private monkeyPatchHook (wechat4u: any, func: string, hookFunc: () => void): void {
-    log.verbose('PuppetWechat4u', 'monkeyPatchHook(wechat4u, %s, func)', func)
-
-    const funcOrig = wechat4u[func]
-    function funcNew (this: any) {
-      log.silly('PuppetWechat4u', 'monkeyPatchHook(wechat4u, %s, func) funcNew()', func)
-      hookFunc()
       return funcOrig.call(this)
     }
     wechat4u[func] = funcNew
@@ -414,7 +411,7 @@ export class PuppetWechat4u extends PUPPET.Puppet {
       }
       // 如果是消息的创建时间小于机器人启动的时间 直接丢弃
       if (msg.CreateTime < this.startTime) {
-        log.warn('PuppetWechat4u', 'initHookEvents() wechat4u.on(message) is history message: %s', JSON.stringify(msg))
+        // log.warn('PuppetWechat4u', 'initHookEvents() wechat4u.on(message) is history message: %s', JSON.stringify(msg))
         return
       }
       this.cacheMessageRawPayload.set(msg.MsgId, msg)

@@ -30,9 +30,8 @@ export interface WebContactRawPayload {
   Uin:          string,
   UserName:     string,
   HeadImgUrl:   string,
-
-  stranger?:    string, // assign by injectio.js
   VerifyFlag:   number,
+  ContactFlag:  number,
 }
 
 export interface WebMessageMediaPayload {
