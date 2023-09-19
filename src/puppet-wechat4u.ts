@@ -608,7 +608,18 @@ export class PuppetWechat4u extends PUPPET.Puppet {
       imageType,
       PUPPET.types.Image[imageType],
     )
-    return PUPPET.throwUnsupportedError()
+    /**
+       * 图片消息
+       */
+    // console.log('图片消息，保存到本地')
+    const filename = `${messageId}.jpg`
+    const msg = await this.wechat4u.getMsgImg(messageId)
+    const file = FileBox.fromStream(
+      msg.data,
+      filename,
+    )
+
+    return file
   }
 
   override async messageFile (id: string): Promise<FileBoxInterface> {
@@ -617,7 +628,7 @@ export class PuppetWechat4u extends PUPPET.Puppet {
     const payload = await this.messagePayload(id)
     const rawPayload = await this.messageRawPayload(id)
 
-    const filename = payload.filename || 'unknown.txt'
+    let filename = payload.filename || 'unknown.txt'
 
     /**
      * 判断消息类型
@@ -644,16 +655,20 @@ export class PuppetWechat4u extends PUPPET.Puppet {
         return emoticonBox
       }
       // eslint-disable-next-lint no-fallthrough
-      case PUPPET.types.Message.Image:
+      case PUPPET.types.Message.Image:{
         /**
          * 图片消息
          */
         // console.log('图片消息，保存到本地')
-        return FileBox.fromStream(
-          (await this.wechat4u.getMsgImg(rawPayload.MsgId)).data,
+        filename = `${rawPayload.MsgId}.jpg`
+        const msg = await this.wechat4u.getMsgImg(rawPayload.MsgId)
+
+        const file = FileBox.fromBuffer(
+          msg.data,
           filename,
         )
-
+        return file
+      }
       case PUPPET.types.Message.Audio: {
         /**
          * 语音消息
@@ -692,9 +707,10 @@ export class PuppetWechat4u extends PUPPET.Puppet {
            * 文件消息
            */
           // console.log('文件消息，保存到本地')
-          return FileBox.fromStream(
+          filename = rawPayload.FileName
+          return FileBox.fromBuffer(
             (await this.wechat4u.getDoc(rawPayload.FromUserName, rawPayload.MediaId, rawPayload.FileName)).data,
-            rawPayload.FileName,
+            filename,
           )
         }
         break
