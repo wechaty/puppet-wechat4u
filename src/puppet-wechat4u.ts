@@ -696,7 +696,7 @@ export class PuppetWechat4u extends PUPPET.Puppet {
          * 视频消息
          */
         // console.log('视频消息，保存到本地')
-        return FileBox.fromStream(
+        return FileBox.fromBuffer(
           (await this.wechat4u.getVideo(rawPayload.MsgId)).data,
           `message-${id}-video.mp4`,
         )
