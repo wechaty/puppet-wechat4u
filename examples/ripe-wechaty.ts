@@ -14,7 +14,6 @@ import { FileBox } from 'file-box'
 
 import { PuppetWechat4u } from '../src/puppet-wechat4u.js'
 import qrcodeTerminal from 'qrcode-terminal'
-import timersPromise from 'timers/promises'
 import fs from 'fs'
 
 function onScan (qrcode: string, status: ScanStatus) {
