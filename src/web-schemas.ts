@@ -218,7 +218,7 @@ export interface WebMessageRawPayload {
 
   SubMsgType:       WebMessageType, // "msgType":"{{message.MsgType}}",
                                     // "subType":{{message.SubMsgType||0}},"msgId":"{{message.MsgId}}"
-
+  VoiceLength:      number,
   /**
    * Status-es
    */

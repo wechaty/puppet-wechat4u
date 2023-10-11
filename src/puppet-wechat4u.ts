@@ -18,7 +18,6 @@
  */
 import Wechat4u from 'wechat4u'
 import QuickLru from '@alloc/quick-lru'
-import * as XMLParser from 'fast-xml-parser'
 import * as PUPPET from 'wechaty-puppet'
 import { log } from 'wechaty-puppet'
 import type { FileBoxInterface } from 'file-box'
@@ -677,14 +676,7 @@ export class PuppetWechat4u extends PUPPET.Puppet {
           (await this.wechat4u.getVoice(rawPayload.MsgId)).data,
           `message-${id}-audio.sil`,
         )
-        const options = {
-          attrNodeName: '$',
-          attributeNamePrefix: '',
-          ignoreAttributes: false,
-        }
-
-        const msgXmlObj = XMLParser.parse(rawPayload.Content, options)
-        const voiceLength = parseInt(msgXmlObj.msg.voicemsg.$.voicelength, 10)
+        const voiceLength = rawPayload.VoiceLength
         audioFileBox.metadata = {
           voiceLength,
         }
