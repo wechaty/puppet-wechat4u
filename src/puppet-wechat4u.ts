@@ -331,6 +331,7 @@ export class PuppetWechat4u extends PUPPET.Puppet {
     wechat4u.on('login', async () => {
       // 由于初始好友列表没有存储当前bot的基础信息，所以在登录后直接更新当前机器人的信息
       this.wechat4u.updateContacts([ this.wechat4u.user ])
+      this.startTime = parseInt(String(new Date().getTime() / 1000))
       // FIXME: where's the logined user id?
       const userId = this.wechat4u.user.UserName
       if (!userId) {
