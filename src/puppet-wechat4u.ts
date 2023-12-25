@@ -673,7 +673,7 @@ export class PuppetWechat4u extends PUPPET.Puppet {
         /**
          * 语音消息
          */
-        const audioFileBox = FileBox.fromStream(
+        const audioFileBox = FileBox.fromBuffer(
           (await this.wechat4u.getVoice(rawPayload.MsgId)).data,
           `message-${id}-audio.sil`,
         )
