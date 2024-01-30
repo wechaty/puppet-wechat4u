@@ -460,7 +460,7 @@ export class PuppetWechat4u extends PUPPET.Puppet {
     this.wechat4u = undefined
     if (this._heartBeatTimer) {
       clearTimeout(this._heartBeatTimer)
-      this._heartBeatTimer = null
+      this._heartBeatTimer = undefined
     }
   }
 
