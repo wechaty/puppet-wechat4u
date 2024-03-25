@@ -16,39 +16,34 @@ See: [New Puppet - Plan to support `WECHATY_HEAD=WECHAT4U` #69](https://github.c
 
 [Wechat4U](https://github.com/nodeWechat/wechat4u) is an excellent wechat bot framework that supports both Node.js & Browser, with rich features and an active community of experienced contributors.
 
-## KNOWN LIMITATIONS
-
-~~1. WeChat Account that registered after 2017 mignt not be able to login Web Wechat, so it can not use PuppetPuppeteer with Wechaty. Please make sure your WeChat Account can be able to login by visiting <https://wx.qq.com>~~
-~~1. Web API can not create room and invite members to room since 2018.~~
-
-UOS has support
-
-更新 - 2023/02/10
-目前使用 1.13.14 大多数使用者可能出现微信被官方封禁提醒，从已知收集的封禁情况，暂未有可解决方案。
-
-猜测可能与近期ChatGPT结合本仓库实现个性化机器人导致相关封禁，请合理，谨慎使用本仓库。
-
-If you want to break the above limitations, please consider to use a Wechaty Puppet other than using Web API, like [wechaty-puppet-padchat](https://github.com/lijiarui/wechaty-puppet-padchat).
-
 Learn more about the Puppet at [Wechaty wiki: Puppet](https://github.com/Chatie/wechaty/wiki/Puppet)
 
 ## HISTORY
 
 ### v1.14.0 (April 21, 2023)
 
-1.Stable version
+目前使用 1.13.14 大多数使用者可能出现微信被官方封禁提醒，从已知收集的封禁情况，暂未有可解决方案。
 
-2.Fix Contact isFriend
+猜测可能与近期ChatGPT结合本仓库实现个性化机器人导致相关封禁，请合理，谨慎使用本仓库。
+
+1. Stable version
+2. Fix Contact isFriend
 
 ### v1.13.8 (Nov 22, 2022)
 
-1.Fix Contact update
+1. Fix Contact update
 
 ### v1.13.1 (Nov 18, 2022)
 
-1.Support uos login
+1. Support uos login
+2. Refactor the code to support more event
 
-2.Refactor the code to support more event
+UOS support solved the following two problems of the naive Web API:
+
+~~1. WeChat Accounts that registered after 2017 might be unable to log in to Web Wechat, so they can not use PuppetPuppeteer with Wechaty. Please make sure your WeChat Account can be able to login by visiting <https://wx.qq.com>~~
+~~1. Web API has not been able to create rooms and invite members to rooms since 2018.~~
+
+If you want to break more limitations, please consider using a Wechaty Puppet rather than a Web API. See all Wechaty Puppet Provider (WPS) at <https://wechaty.js.org/docs/puppet-providers> and Wechaty Puppet Service (WPS) at <https://wechaty.js.org/docs/puppet-services>
 
 ### master v1.0 (Oct 30, 2021)
 
@@ -60,7 +55,7 @@ Release 1.0 of Wechaty Puppet for Wechat4u
 
 ### v0.18 (Feb 20, 2021)
 
-Fix `wechaty-puppet` dependencies
+Fix `wechaty-puppet` dependencies.
 
 ### v0.0.1 (Jun 30, 2018)
 
@@ -73,15 +68,15 @@ Init version
 
 ## AUTHOR
 
-[Huan LI](http://linkedin.com/in/zixia) \<zixia@zixia.net\>
+[Huan Li](http://linkedin.com/in/huan42) \<huan@chatier.io\>
 
 <!-- markdownlint-disable MD033 -->
 <a href="https://stackexchange.com/users/265499">
-  <img src="https://stackexchange.com/users/flair/265499.png" width="208" height="58" alt="profile for zixia on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="profile for zixia on Stack Exchange, a network of free, community-driven Q&amp;A sites">
+  <img src="https://stackexchange.com/users/flair/265499.png" width="208" height="58" alt="Profile for Huan on Stack Exchange, a network of free, community-driven Q &amp; A sites" title="Profile for huan on Stack Exchange, a network of free, community-driven Q &amp; A sites">
 </a>
 
 ## COPYRIGHT & LICENSE
 
-- Code & Docs © 2018 Huan LI \<zixia@zixia.net\>
+- Code & Docs © 2018 Huan Li \<huan@chatie.io\>
 - Code released under the Apache-2.0 License
 - Docs released under Creative Commons
