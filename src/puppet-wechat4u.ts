@@ -51,7 +51,7 @@ import { parseAppmsgMessagePayload } from './wechat4u/messages/message-appmsg.js
 import { wechat4uContactToWechaty } from './wechat4u/schema-mapper/contact.js'
 import { wechat4uRoomMemberToWechaty, wechat4uRoomToWechaty } from './wechat4u/schema-mapper/room.js'
 import { isRoomId } from './wechat4u/utils/is-type.js'
-import { getExtensionFromMimeType } from './wechat4u/utils/mim-to-extension'
+import { getExtensionFromMimeType } from './wechat4u/utils/mim-to-extension.js'
 
 const MEMORY_SLOT_NAME = 'PUPPET-WECHAT4U'
 
