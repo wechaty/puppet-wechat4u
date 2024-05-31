@@ -46,11 +46,12 @@ import { parseMiniProgramMessagePayload } from './wechat4u/messages/message-mini
 // 解析appmsg 数据格式
 import { parseAppmsgMessagePayload } from './wechat4u/messages/message-appmsg.js'
 // 解析表情数据格式
-import { parseEmotionMessagePayload } from './wechat4u/messages/message-emotion.js'
+// import { parseEmotionMessagePayload } from './wechat4u/messages/message-emotion.js'
 
 import { wechat4uContactToWechaty } from './wechat4u/schema-mapper/contact.js'
 import { wechat4uRoomMemberToWechaty, wechat4uRoomToWechaty } from './wechat4u/schema-mapper/room.js'
 import { isRoomId } from './wechat4u/utils/is-type.js'
+import {getExtensionFromMimeType} from "./wechat4u/utils/mim-to-extension";
 
 const MEMORY_SLOT_NAME = 'PUPPET-WECHAT4U'
 
@@ -646,17 +647,18 @@ export class PuppetWechat4u extends PUPPET.Puppet {
 
       case PUPPET.types.Message.Emoticon: {
         /**
-         * 表情消息
+         * 图片消息
          */
-        const emotionPayload = await parseEmotionMessagePayload(rawPayload)
-        const emoticonBox = FileBox.fromUrl(emotionPayload.cdnurl, { name: `message-${id}-emoticon.jpg` })
+          // console.log('图片消息，保存到本地')
+        const msg = await this.wechat4u.getMsgImg(rawPayload.MsgId)
+        const extensionFromMimeType = getExtensionFromMimeType(msg.type) || 'jpg'
+        filename = `${rawPayload.MsgId}.${extensionFromMimeType}`
 
-        emoticonBox.metadata = {
-          payload: emotionPayload,
-          type: 'emoticon',
-        }
-
-        return emoticonBox
+        const file = FileBox.fromBuffer(
+          msg.data,
+          filename,
+        )
+        return file
       }
       // eslint-disable-next-lint no-fallthrough
       case PUPPET.types.Message.Image:{
@@ -664,8 +666,9 @@ export class PuppetWechat4u extends PUPPET.Puppet {
          * 图片消息
          */
         // console.log('图片消息，保存到本地')
-        filename = `${rawPayload.MsgId}.jpg`
         const msg = await this.wechat4u.getMsgImg(rawPayload.MsgId)
+        const extensionFromMimeType = getExtensionFromMimeType(msg.type) || 'jpg'
+        filename = `${rawPayload.MsgId}.${extensionFromMimeType}`
 
         const file = FileBox.fromBuffer(
           msg.data,
